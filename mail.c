@@ -157,13 +157,14 @@ void send_email(struct Email email) {
 	      fprintf(stderr, "curl_easy_perform() failed: %s\n",
 		      curl_easy_strerror(res_));
 	    }
+	    else {
+	    	printf("\nsent email - email to -->  %s with email: %s\n",email.To_name,email.To_addr);
+	    }
 
 	    /* Free the list of recipients */
 	    curl_slist_free_all(recipients);
 
 	    curl_easy_cleanup(curl);
-	    printf("\nsent email - email to -->  %s with email: %s\n",
-			email.To_name,email.To_addr);
 	  }
 }
 
