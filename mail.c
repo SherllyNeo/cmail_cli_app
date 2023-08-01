@@ -150,7 +150,6 @@ void send_email(struct Email email) {
 	    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
 	    curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
 	    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-	    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 	     /* Send the message */
 	    res_ = curl_easy_perform(curl);
 

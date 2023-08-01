@@ -6,4 +6,3 @@ cmail: cmail.c emailer.h config.h mail.c
 
 install:
 	$(CC) -o mailer cmail.c emailer.h config.h $(cflags) && cp ./mailer /usr/local/bin
-
