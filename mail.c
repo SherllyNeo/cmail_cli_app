@@ -144,7 +144,7 @@ void send_email(struct Email email) {
 	    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, from_mail);
 
 	    recipients = curl_slist_append(recipients, to_email);
-	    recipients = curl_slist_append(recipients, to_email);
+	    recipients = curl_slist_append(recipients, email.Cc_addr);
 	    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 	    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
 	    curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
