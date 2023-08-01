@@ -134,14 +134,15 @@ void send_email(struct Email email) {
 		    fprintf(stderr,"Could not find env variables\n");
 		    exit(0);
 	    }
+	    curl_easy_setopt(curl,CURLOPT_USE_SSL,(long)CURLUSESSL_ALL);
 	    curl_easy_setopt(curl, CURLOPT_USERNAME, EMAIL_USER);
 	    curl_easy_setopt(curl, CURLOPT_PASSWORD, EMAIL_PASS);
 
 	    curl_easy_setopt(curl, CURLOPT_URL, EMAIL_SMTP);
 
-	    curl_easy_setopt(curl,CURLOPT_USE_SSL,(long)CURLUSESSL_ALL);
 
 	    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, from_mail);
+	    curl_easy_setopt(curl, CURLOPT_MAIL_AUTH, EMAIL_USER);
 
 	    recipients = curl_slist_append(recipients, to_email);
 	    recipients = curl_slist_append(recipients, email.Cc_addr);
@@ -149,6 +150,7 @@ void send_email(struct Email email) {
 	    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
 	    curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
 	    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+	    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 	     /* Send the message */
 	    res_ = curl_easy_perform(curl);
 
