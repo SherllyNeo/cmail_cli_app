@@ -7,6 +7,13 @@
 #include <stdbool.h>
 #include "config.h"
 
+
+#define GENERIC_SIZE 100
+#define PAYLOAD_SIZE 900000
+#define ATTACHMENT_SIZE 500000
+#define SUBJECT_SIZE 500
+#define BODY_SIZE 20000
+
 char* read_attachment(char* file_path) {
 	char * buffer = 0;
 	long length;
@@ -61,7 +68,7 @@ struct upload_status {
   size_t bytes_read;
 };
 
-char payload_text[70000];
+char payload_text[PAYLOAD_SIZE];
 
 
 static size_t payload_source(char *ptr,size_t size,size_t nmemb,void *userp) {
@@ -92,13 +99,12 @@ const char *data;
 void send_email(struct Email email) {
 	/* constant values */
 
-	char to_email[100];
-	char to[100];
-	char subject[200];
-	char body[20000];
+	char to_email[GENERIC_SIZE];
+	char to[GENERIC_SIZE];
+	char subject[GENERIC_SIZE];
+	char body[BODY_SIZE];
 	bool has_attachment = false;
-	int attachment_size_limit = 24000;
-	char attachment_content[attachment_size_limit];
+	char attachment_content[ATTACHMENT_SIZE];
 	char* attachment_file;
 	char* attachment_file_name;
 
@@ -108,7 +114,7 @@ void send_email(struct Email email) {
 	if (email.Attachment_name && email.Attachment_path) {
 
 	char* attachment_buffer = read_attachment(email.Attachment_path);
-	strncpy(attachment_content,attachment_buffer,attachment_size_limit);
+	strncpy(attachment_content,attachment_buffer,ATTACHMENT_SIZE);
 
 	sprintf(payload_text,"To: %s \r\nFrom:%s \r\nCc: %s \r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed;\r\n\tboundary=\"XXXXboundary text\"\r\nSubject: %s \r\n\r\n--XXXXboundary text\r\nContent-Type: text/plain\r\n\r\n %s \r\n\r\n--XXXXboundary text\r\nContent-Type: text/plain;\r\nContent-Disposition: attachment;\r\n\tfilename=\"%s\"\r\n\r\n %s \r\n\r\n--XXXXboundary text--\r\n",to,from,email.Cc_addr,email.Subject,email.Body,email.Attachment_name,attachment_content);
 	}
