@@ -111,6 +111,7 @@ void send_email(struct Email email) {
 	sprintf(to_email,"<%s>",email.To_addr);
 	sprintf(to,"%s <%s>",email.To_name,email.To_addr);
 
+	printf("%s %s %s %s %s %s %s\n",email.To_addr,email.To_name,email.Cc_addr,email.Subject,email.Body,email.Attachment_path,email.Attachment_name);
 	if (email.Attachment_name && email.Attachment_path) {
 
         char* attachment_buffer = read_attachment(email.Attachment_path);
@@ -155,7 +156,9 @@ void send_email(struct Email email) {
 	    curl_easy_setopt(curl, CURLOPT_MAIL_AUTH, EMAIL_USER);
 
 	    recipients = curl_slist_append(recipients, to_email);
-	    recipients = curl_slist_append(recipients, email.Cc_addr);
+        if (strcmp("",email.Cc_addr)) {
+	        recipients = curl_slist_append(recipients, email.Cc_addr);
+        }
 	    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 	    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
 	    curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);

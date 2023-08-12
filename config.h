@@ -1,5 +1,5 @@
-char* from_mail = "<no-reply@work-clockwise.com>";
-char* from = "Test app <no-reply@work-clockwise.com>";
+char* from_mail = "<app@sherllymail.com>";
+char* from = "Test app <app@sherllymail.com>";
 
 
 /*
