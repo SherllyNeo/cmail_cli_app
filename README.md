@@ -2,6 +2,7 @@
 A simple cli app for sending emails - only supports plain text / csv file attachments
 
 Supports secure connections
+Supports multile emails and multple cc address
 
 Set your from email 'apperance' from the config.h file. 
 
@@ -42,4 +43,11 @@ sent email - email to -->  Example Person with email: example@example.com
 mailer -t "example@example.com" --to_name "Example Person" -s "Subject here" -c "cc_addr@new_server.com" -b "Body here - Simple string" -a "/attachment/path/file.txt" -an "attachment.txt"
 
 sent email - email to -->  Example Person with email: example@example.com
+
+### Sending to multiple people
+Just comma seperate, for example 
+
+mailer -t "example@example.com, danny@sherllymail.com" --to_name "Example Person" -s "Subject here" -b "Body here - Simple string" 
+
+spaces get trimmed for all addresses 
 

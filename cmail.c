@@ -4,6 +4,7 @@
 #include <curl/curl.h>
 #include "emailer.h"
 #include "shared.h"
+#include <ctype.h>
 
 
 
@@ -18,20 +19,29 @@ if you want attachment, both of these must be specified\n \
 -a or --attachment_path sets attachment_path\n \
 -an or --attachment_name sets attachment_path\n";
 
+void remove_spaces (char* str_trimmed, char* str_untrimmed)
+{
+  while (*str_untrimmed != '\0')
+  {
+    if(!isspace(*str_untrimmed))
+    {
+      *str_trimmed = *str_untrimmed;
+      str_trimmed++;
+    }
+    str_untrimmed++;
+  }
+  *str_trimmed = '\0';
+}
+
 int main(int argc, char* argv[]) {
-    char* to_addr;
-    char* to_name;
+    char* to_addr = NULL;
+    char* to_name = NULL;
     char* cc_addr = "";
-    char* subject;
-    char* body;
+    char* subject = NULL;
+    char* body = NULL;
     char* attachment_path = NULL;
     char* attachment_name = NULL;
 
-	if (argc<5 && argc!=2) {
-	printf("\nYou need at least 5 arguments. To Address, To name, CC address, Subject, Body and optional attachment path and name\n");
-	fprintf(stderr,"\nToo few arguments, needs at least five \n");
-	exit(0);
-	}
     for (int i=1;i<argc;i++) {
         char* current_arg = argv[i];
         if (!strcmp("-h",current_arg) || !strcmp("--help",current_arg)) {
@@ -60,6 +70,17 @@ int main(int argc, char* argv[]) {
             attachment_name = argv[++i];
         }
     }
+    /* check requirements */
+    if (!to_addr) {
+        printf("\nNo to address found \n%s\n",help);
+        fprintf(stderr,"\nToo few arguments. Need at least sending address\n");
+        exit(0);
+    }
+
+    /* trim addresses */
+    remove_spaces(to_addr,to_addr); 
+    if (strcmp("",cc_addr)) remove_spaces(cc_addr,cc_addr); 
+
 	struct Email email = {to_addr,to_name,cc_addr,subject,body,attachment_path,attachment_name};
 
 	/* send email */

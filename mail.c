@@ -111,7 +111,6 @@ void send_email(struct Email email) {
 	sprintf(to_email,"<%s>",email.To_addr);
 	sprintf(to,"%s <%s>",email.To_name,email.To_addr);
 
-	printf("%s %s %s %s %s %s %s\n",email.To_addr,email.To_name,email.Cc_addr,email.Subject,email.Body,email.Attachment_path,email.Attachment_name);
 	if (email.Attachment_name && email.Attachment_path) {
 
         char* attachment_buffer = read_attachment(email.Attachment_path);
@@ -155,9 +154,27 @@ void send_email(struct Email email) {
 	    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, from_mail);
 	    curl_easy_setopt(curl, CURLOPT_MAIL_AUTH, EMAIL_USER);
 
-	    recipients = curl_slist_append(recipients, to_email);
+        const char delim[2] = ",";
+        char *token;
+
+
+
+        /* send to all to emails */
+        token = strtok(email.To_addr, delim);
+        while( token != NULL ) {
+	        recipients = curl_slist_append(recipients, token);
+            token = strtok(NULL, delim);
+        }
+
+
+        
         if (strcmp("",email.Cc_addr)) {
-	        recipients = curl_slist_append(recipients, email.Cc_addr);
+            /* send to all cc emails */
+            token = strtok(email.Cc_addr, delim);
+            while( token != NULL ) {
+                recipients = curl_slist_append(recipients, token);
+                token = strtok(NULL, delim);
+            }
         }
 	    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 	    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
