@@ -24,6 +24,7 @@ char* EMAIL_SMTP = getenv("EMAIL_SMTP"); account server
 if you want attachment, both of these must be specified
 -a or --attachment_path sets attachment_path
 -an or --attachment_name sets attachment_path
+-f or --force will means if an attachment isn't found, then it will send the email without an attachment rather than crashing.
 
 
 

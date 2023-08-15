@@ -17,7 +17,8 @@ char help[] = "\nSherlly's simple cmail \n---------------------- \n\n \
 -b or --body sets body\n \
 if you want attachment, both of these must be specified\n \
 -a or --attachment_path sets attachment_path\n \
--an or --attachment_name sets attachment_path\n";
+-an or --attachment_name sets attachment_path\n \
+-f  or --force alone will ensure email is sent without attachment if attachment isn't found. rather than crashing ";
 
 void remove_spaces (char* str_trimmed, char* str_untrimmed)
 {
@@ -41,6 +42,7 @@ int main(int argc, char* argv[]) {
     char* body = NULL;
     char* attachment_path = NULL;
     char* attachment_name = NULL;
+    int force = 0;
 
     for (int i=1;i<argc;i++) {
         char* current_arg = argv[i];
@@ -69,6 +71,9 @@ int main(int argc, char* argv[]) {
         else if (!strcmp("-an",current_arg) || !strcmp("--attachment_name",current_arg)) {
             attachment_name = argv[++i];
         }
+        else if (!strcmp("-f",current_arg) || !strcmp("--force",current_arg)) {
+            force = 1;
+        }
     }
     /* check requirements */
     if (!to_addr) {
@@ -84,7 +89,7 @@ int main(int argc, char* argv[]) {
 	struct Email email = {to_addr,to_name,cc_addr,subject,body,attachment_path,attachment_name};
 
 	/* send email */
-	send_email(email);
+	send_email(email,force);
 
 	return 0;
 
