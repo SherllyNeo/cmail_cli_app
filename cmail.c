@@ -18,6 +18,7 @@ char help[] = "\nSherlly's simple cmail \n---------------------- \n\n \
 if you want attachment, both of these must be specified\n \
 -a or --attachment_path sets attachment_path\n \
 -an or --attachment_name sets attachment_path\n \
+Attachment name will default to attachment path if not specified\n \
 -f  or --force alone will ensure email is sent without attachment if attachment isn't found. rather than crashing ";
 
 void remove_spaces (char* str_trimmed, char* str_untrimmed)
@@ -81,6 +82,9 @@ int main(int argc, char* argv[]) {
         fprintf(stderr,"\nToo few arguments. Need at least sending address\n");
         exit(0);
     }
+    if (!attachment_name && attachment_path) {
+        strcpy(attachment_name,attachment_path);
+    };
 
     /* trim addresses */
     remove_spaces(to_addr,to_addr); 
