@@ -46,7 +46,7 @@ int count_lines_of_file(char* file_path) {
 	int lines = 0;
 	char ch;
 	if ((fp = fopen(file_path, "r")) == NULL) {
-		fprintf(stderr,"Error! opening file");
+		fprintf(stderr,"Error! opening file\n");
 		exit(0);
 	    }
 
@@ -102,19 +102,19 @@ void send_email(struct Email email,int force) {
     char* EMAIL_SMTP = getenv("EMAIL_SMTP");
     char* EMAIL_USERNAME = getenv("EMAIL_USERNAME");
     if (EMAIL_USER == NULL) {
-        fprintf(stderr,"Could not find env variable EMAIL_USER: example@email.com");
+        fprintf(stderr,"Could not find env variable EMAIL_USER: example@email.com\n");
         exit(0);
     }
     if (EMAIL_SMTP == NULL) {
-        fprintf(stderr,"Could not find env variable SMTP: smtp://smtp.example.com");
+        fprintf(stderr,"Could not find env variable SMTP: smtp://smtp.example.com\n");
         exit(0);
     }
     if (EMAIL_USERNAME == NULL) {
-        fprintf(stderr,"Could not find env variable EMAIL_USERNAME: FirstName LastName");
+        fprintf(stderr,"Could not find env variable EMAIL_USERNAME: FirstName LastName\n");
         exit(0);
     }
     if (EMAIL_PASS == NULL) {
-        fprintf(stderr,"Could not find env variable EMAIL_PASS: examplepassword");
+        fprintf(stderr,"Could not find env variable EMAIL_PASS: examplepassword\n");
         exit(0);
     }
 
