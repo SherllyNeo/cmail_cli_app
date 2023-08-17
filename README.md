@@ -1,10 +1,9 @@
 # cmail_cli_app
-A simple cli app for sending emails - only supports plain text / csv file attachments
+A simple cli app for sending emails 
 
 Supports secure connections
 Supports multile emails and multple cc address
-
-Set your from email 'apperance' from the config.h file. 
+Supports text, csv and similar attachments
 
 Secret config is kept in enviroment variables and used like so
 char* EMAIL_USER = getenv("EMAIL_USER");  account user
