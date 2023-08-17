@@ -5,7 +5,6 @@
 #include <time.h>
 #include "shared.h"
 #include <stdbool.h>
-#include "config.h"
 
 
 #define GENERIC_SIZE 100
@@ -98,7 +97,28 @@ const char *data;
 
 void send_email(struct Email email,int force) {
 	/* constant values */
+    char* EMAIL_USER = getenv("EMAIL_USER");
+    char* EMAIL_PASS = getenv("EMAIL_PASS");
+    char* EMAIL_SMTP = getenv("EMAIL_SMTP");
+    char* EMAIL_USERNAME = getenv("EMAIL_USERNAME");
+    if (EMAIL_USER == NULL) {
+        fprintf(stderr,"Could not find env variable EMAIL_USER: example@email.com");
+        exit(0);
+    }
+    if (EMAIL_SMTP == NULL) {
+        fprintf(stderr,"Could not find env variable SMTP: smtp://smtp.example.com");
+        exit(0);
+    }
+    if (EMAIL_USERNAME == NULL) {
+        fprintf(stderr,"Could not find env variable EMAIL_USERNAME: FirstName LastName");
+        exit(0);
+    }
+    if (EMAIL_PASS == NULL) {
+        fprintf(stderr,"Could not find env variable EMAIL_PASS: examplepassword");
+        exit(0);
+    }
 
+    char from[GENERIC_SIZE];
 	char to_email[GENERIC_SIZE];
 	char to[GENERIC_SIZE];
 	char subject[GENERIC_SIZE];
@@ -110,6 +130,7 @@ void send_email(struct Email email,int force) {
 
 	sprintf(to_email,"<%s>",email.To_addr);
 	sprintf(to,"%s <%s>",email.To_name,email.To_addr);
+    sprintf(from,"%s <%s>",EMAIL_USERNAME,EMAIL_USER);
 
 	if (email.Attachment_name && email.Attachment_path) {
 
@@ -141,21 +162,12 @@ void send_email(struct Email email,int force) {
 
 	curl = curl_easy_init();
 	  if(curl) {
-	    char* EMAIL_USER = getenv("EMAIL_USER");
-	    char* EMAIL_PASS = getenv("EMAIL_PASS");
-	    char* EMAIL_SMTP = getenv("EMAIL_SMTP");
-	    if (EMAIL_USER == NULL || EMAIL_PASS == NULL || EMAIL_SMTP == NULL) {
-		    fprintf(stderr,"Could not find env variables\n");
-		    exit(0);
-	    }
 	    curl_easy_setopt(curl,CURLOPT_USE_SSL,(long)CURLUSESSL_ALL);
 	    curl_easy_setopt(curl, CURLOPT_USERNAME, EMAIL_USER);
 	    curl_easy_setopt(curl, CURLOPT_PASSWORD, EMAIL_PASS);
 
 	    curl_easy_setopt(curl, CURLOPT_URL, EMAIL_SMTP);
-
-
-	    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, from_mail);
+	    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, EMAIL_USER);
 	    curl_easy_setopt(curl, CURLOPT_MAIL_AUTH, EMAIL_USER);
 
         const char delim[2] = ",";

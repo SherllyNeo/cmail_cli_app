@@ -83,7 +83,10 @@ int main(int argc, char* argv[]) {
         exit(0);
     }
     if (!attachment_name && attachment_path) {
-        strcpy(attachment_name,attachment_path);
+        attachment_name = attachment_path;
+    };
+    if (!to_name && to_addr) {
+        to_name = to_addr;
     };
 
     /* trim addresses */

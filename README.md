@@ -8,6 +8,7 @@ Set your from email 'apperance' from the config.h file.
 
 Secret config is kept in enviroment variables and used like so
 char* EMAIL_USER = getenv("EMAIL_USER");  account user
+char* EMAIL_USERNAME = getenv("EMAIL_USERNAME");  account user name
 char* EMAIL_PASS = getenv("EMAIL_PASS"); account password
 char* EMAIL_SMTP = getenv("EMAIL_SMTP"); account server
  
@@ -24,6 +25,7 @@ char* EMAIL_SMTP = getenv("EMAIL_SMTP"); account server
 if you want attachment, both of these must be specified
 -a or --attachment_path sets attachment_path
 -an or --attachment_name sets attachment_path
+Will assume attachment name is the same as the path if not specified
 -f or --force will means if an attachment isn't found, then it will send the email without an attachment rather than crashing.
 
 
@@ -48,7 +50,7 @@ sent email - email to -->  Example Person with email: example@example.com
 ### Sending to multiple people
 Just comma seperate, for example 
 
-mailer -t "example@example.com, danny@sherllymail.com" --to_name "Example Person" -s "Subject here" -b "Body here - Simple string" 
+mailer -t "example@example.com, danny@sherllymail.com" -n "Example group name" -s "Subject here" -b "Body here - Simple string" 
 
 spaces get trimmed for all addresses 
 
