@@ -1,5 +1,5 @@
 CC=gcc
-cflags=-lcurl
+cflags=-lcurl -Wall -Wextra -pedantic
 
 cmail: cmail.c emailer.h mail.c
 	$(CC) -o mailer cmail.c emailer.h $(cflags)

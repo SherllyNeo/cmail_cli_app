@@ -121,12 +121,7 @@ void send_email(struct Email email,int force) {
     char from[GENERIC_SIZE];
 	char to_email[GENERIC_SIZE];
 	char to[GENERIC_SIZE];
-	char subject[GENERIC_SIZE];
-	char body[BODY_SIZE];
-	bool has_attachment = false;
 	char attachment_content[ATTACHMENT_SIZE];
-	char* attachment_file;
-	char* attachment_file_name;
 
 	sprintf(to_email,"<%s>",email.To_addr);
 	sprintf(to,"%s <%s>",email.To_name,email.To_addr);
