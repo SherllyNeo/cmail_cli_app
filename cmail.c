@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
             force = 1;
         }
     }
+
     /* check requirements */
     if (!to_addr) {
         printf("\nNo to address found \n%s\n",help);

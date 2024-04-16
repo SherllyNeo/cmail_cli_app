@@ -200,7 +200,9 @@ void send_email(struct Email email,int force) {
 		      curl_easy_strerror(res_));
 	    }
 	    else {
-	    	printf("\nsent email - email to -->  %s with email: %s\n",email.To_name,email.To_addr);
+            time_t t = time(NULL);
+            struct tm *tm = localtime(&t);
+	    	printf("\nsent email: %s - email to -->  %s with addr %s with subject: %s\n",asctime(tm),email.To_name,email.To_addr,email.Subject);
 	    }
 
 	    /* Free the list of recipients */
