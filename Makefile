@@ -1,8 +1,8 @@
-CC=gcc
-cflags=-lcurl -Wall -Wextra -pedantic
+CFLAGS = -g3 -O -Wall -W -pedantic -std=c99 
+LDFLAGS = -L/opt/vc/lib
+LDLIBS =  -lcurl
 
-cmail: cmail.c emailer.h mail.c
-	$(CC) -o mailer cmail.c emailer.h $(cflags)
-
-install:
-	$(CC) -o mailer cmail.c emailer.h $(cflags) && cp ./mailer /usr/local/bin
+mailer src/main.c:
+	gcc $(CFLAGS) $(LDFLAGS) src/main.c -o bin/mailer $(LDLIBS)
+install: src/main.c 
+	gcc $(CFLAGS) $(LDFLAGS) src/main.c -o bin/mailer $(LDLIBS) && cp -f ./bin/mailer $(HOME)/.local/bin/
