@@ -65,7 +65,6 @@ void send_email(Email email,int force,char* user,char* username, char* smtp,char
             strcpy(payload_text,email_txt);
             free(email_txt);
 
-            printf("%s\n",payload_text);
             curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
             curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
             curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);

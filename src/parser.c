@@ -281,7 +281,6 @@ int parseAttachments(const char* input,Attachment attachments[MAX_ATTACH_AMOUNT]
             name = separator + 1;
         }
 
-        //printf("DEBUG token: %s, seperator: %s, copy: %s, valid_attachments: %d,name: %s, lasttoken %c,second to lasttoken %c,third to lasttoken %c\n",token,separator,copy,valid_attachments,name,token[strlen(token)-1],token[strlen(token)-3]);
         result = initAttachment(token, name);
         if (!result.valid) {
             fprintf(stderr,"\nSKIPPING: issue with attachment %s, skipping\n",token);
