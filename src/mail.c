@@ -1,6 +1,7 @@
 #include <curl/curl.h>
 #include "parser.h"
 #include "primitives.h"
+#include "composer.h"
 
 
 char payload_text[PAYLOAD_SIZE];
