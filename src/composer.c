@@ -13,7 +13,6 @@
 #define FROM_SIZE 500
 #define CC_SIZE 200
 #define BCC_SIZE 200
-#define ATTACHMENT_SIZE 90000
 #define PAYLOAD_SIZE (SUBJECT_SIZE + BODY_SIZE + ATTACHMENT_SIZE)*3
 
 #define EXT_ATTACHMENT_ERR 5
@@ -74,30 +73,8 @@ char* read_attachment(char* file_path) {
     }
     return NULL;
 
-
 }
 
-int count_lines_of_file(char* file_path) {
-    FILE * fp;
-    int lines = 0;
-    char ch;
-    if ((fp = fopen(file_path, "r")) == NULL) {
-        fprintf(stderr,"Error! opening file\n");
-        exit(0);
-    }
-
-    while(!feof(fp))
-    {
-        ch = fgetc(fp);
-        if(ch == '\n')
-        {
-            lines++;
-        }
-    }
-
-    return lines;
-
-}
 
 const char* get_content_type(fileType file_extension) {
     switch (file_extension) {
@@ -132,21 +109,21 @@ char* compose_email(Email email,int force) {
                     fprintf(stderr,"failed to load content from: %s\n",email.attachments[i].filepath);
                 }
 
-                char* encoding = "";
-                if (email.attachments[i].filetype == PDF || email.attachments[i].filetype == JPG || email.attachments[i].filetype == PNG) {
-                    encoding = "Content-Transfer-Encoding: base64\r\n";
-                    // Base64 encode PDF content
-                    size_t pdfContentSize = strlen(attachment_buffer);
-                    size_t encodedLength;
-                    char *encodedPdfContent = base64Encode((const unsigned char *)attachment_buffer, pdfContentSize, &encodedLength);
-                    if (!encodedPdfContent) {
-                        fprintf(stderr, "[-] Failed to encode PDF content. Using raw\n");
-                        free(encodedPdfContent);
-                    }
-                    else {
-                        strcpy(attachment_buffer,encodedPdfContent);
-                    }
+                bool encodingEnabled = false;
+                char encoding[50] = "";
+                size_t pdfContentSize = strlen(attachment_buffer);
+                size_t encodedLength;
+                char *encodedContent = base64Encode((const unsigned char *)attachment_buffer, pdfContentSize, &encodedLength);
+                if (encodedContent && encodingEnabled) {
+                    strcpy(attachment_buffer,encodedContent);
+                    strcpy(encoding,"Content-Transfer-Encoding: base64\r\n");
                 }
+                else {
+                    fprintf(stderr, "[-] Failed to base64 encode content %s.\nUsing raw\n",email.attachments[i].name);
+                    free(encodedContent);
+                }
+
+                printf("attach buffer: %s\n",attachment_buffer);
 
                 /* add to attachment content ready to be appended to email payload */
                 snprintf(tmp,ATTACHMENT_SIZE/email.amount_of_attachments,
@@ -158,6 +135,7 @@ char* compose_email(Email email,int force) {
                         "%s\r\n"
                         "--%s\r\n",
                         get_content_type(email.attachments[i].filetype),email.attachments[i].name,encoding,attachment_buffer,boundary_text);
+
                 free(attachment_buffer);
 
                 strncat(attachment_content, tmp, ATTACHMENT_SIZE-1);
@@ -242,7 +220,8 @@ char* compose_email(Email email,int force) {
             "Content-Type: text/plain;\r\n"
             "\r\n"
             "%s\r\n"
-            "\r\n--%s",
+            "\r\n--%s"
+             "\r\n",
             addressesLine, fromLine, ccaddressesLine, boundary_text, email.subject,boundary_text,email.body,boundary_text);
 
 
