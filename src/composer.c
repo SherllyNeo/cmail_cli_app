@@ -250,8 +250,6 @@ char* compose_email(Email email,int force) {
         strcat(payload_text,attachment_content);
     }
 
-    printf("DEBUG %s\n",payload_text);
-
     return payload_text;
 }
 
