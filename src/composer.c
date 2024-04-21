@@ -125,7 +125,7 @@ char* base64_encode(char* buffer,size_t length) {
 }
 
 
-char* read_attachment_b64(const char* file_path) {
+char* read_attachment_encoded(const char* file_path,char*(*encoder)(char*,size_t)) {
     FILE* file = fopen(file_path, "rb");
     if (!file) {
         fprintf(stderr, "Failed to open file: %s\n", file_path);
@@ -146,10 +146,10 @@ char* read_attachment_b64(const char* file_path) {
     fread(buffer, 1, file_size, file);
     fclose(file);
 
-    char* base64_content = base64_encode(buffer,file_size);
+    char* encoded_content = encoder(buffer,file_size);
     // Calculate the size of the Base64-encoded buffer
 
-    return base64_content;
+    return encoded_content;
 }
 
 const char* get_content_type(fileType file_extension) {
@@ -176,7 +176,7 @@ char* compose_email(Email email,int force) {
         int attachmentsParsed = 0;
         for (int i = 0; i<email.amount_of_attachments;i++) {
             char tmp[ATTACHMENT_SIZE-1] = { 0 };
-            char* attachment_buffer = read_attachment_b64(email.attachments[i].filepath);
+            char* attachment_buffer = read_attachment_encoded(email.attachments[i].filepath,base64_encode);
             if (attachment_buffer != NULL) {
                 if (strlen(attachment_buffer) > 0) {
                     attachmentsParsed++;
@@ -299,8 +299,6 @@ char* compose_email(Email email,int force) {
                 boundary_text);
         strcat(payload_text,tmp);
     }
-
-    printf("%s\n",payload_text);
 
     return payload_text;
 }
