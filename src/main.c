@@ -158,11 +158,20 @@ int main(int argc, char* argv[]) {
         exit(EXT_ARG_PARSING);
     }
 
+    if ((addrsAmount+ccaddrsAmount+bccaddrsAmount) > MAX_ADDR_AMOUNT) {
+        fprintf(stderr,"\nERROR: Too many to email addresses\n");
+        exit(EXT_ARG_PARSING);
+    }
+    if (attachmentsAmount > MAX_ATTACH_AMOUNT) {
+        fprintf(stderr,"\nERROR: Too many to attachments\n");
+        exit(EXT_ARG_PARSING);
+    }
+
     printf("[+] Parsed addresses\n");
     Email email = initEmail(EMAIL_USERNAME,EMAIL_USER,addresses,addrsAmount,ccaddresses,ccaddrsAmount,bccaddresses,bccaddrsAmount,attachments,attachmentsAmount,subject,body);
-    printf("[+] Parsed email\n");
+    printf("[+] Created email\n");
     send_email(email,force, EMAIL_USER,EMAIL_USERNAME, EMAIL_SMTP, EMAIL_PASS);
-    printf("[+] Done :)\n");
+    printf("\n[+] Done :)\n");
 
     return EXIT_SUCCESS;
 

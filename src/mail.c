@@ -54,11 +54,18 @@ void send_email(Email email,int force,char* user,char* username, char* smtp,char
         curl_easy_setopt(curl, CURLOPT_MAIL_AUTH, user);
 
         if (email.amount_of_addresses > 0) {
+            char sentAddresses[MAX_ADDR_AMOUNT*MAX_ADDR_LENGTH*2];
+            memset(sentAddresses,'\0',sizeof(sentAddresses));
+
             for (int i =0; i<email.amount_of_addresses;i++) {
                 recipients = curl_slist_append(recipients, email.addresses[i].address);
+                strcat(sentAddresses,"\n");
+                strcat(sentAddresses,email.addresses[i].address);
             }
-            for (int i =0; i<email.amount_of_ccaddresses;i++) {
-                recipients = curl_slist_append(recipients, email.ccaddresses[i].address);
+            for (int j =0; j<email.amount_of_ccaddresses;j++) {
+                recipients = curl_slist_append(recipients, email.ccaddresses[j].address);
+                strcat(sentAddresses,"\n");
+                strcat(sentAddresses,email.addresses[j].address);
             }
 
             char* email_txt = compose_email(email, force);
@@ -78,9 +85,10 @@ void send_email(Email email,int force,char* user,char* username, char* smtp,char
                 fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res_));
             }
             else {
+                printf("payload %s\n",payload_text);
                 time_t t = time(NULL);
                 struct tm *tm = localtime(&t);
-                printf("\n[+] sent emails at: %s\n",asctime(tm));
+                printf("\n[+] sent email (%s) at: %s\nto:%s",email.subject,asctime(tm),sentAddresses);
             }
 
             /* Free the list of recipients */

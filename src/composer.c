@@ -113,13 +113,13 @@ char* compose_email(Email email,int force) {
 
     char* boundary_text = "XXXXboundary text";
     bool sendAttachments = false;
-    char attachment_content[ATTACHMENT_SIZE];
+    char attachment_content[ATTACHMENT_SIZE*MAX_ADDR_AMOUNT];
 
     /* loop over attachs if they exist and make text to add to email payload */
     if (email.amount_of_attachments > 0) {
         int attachmentsParsed = 0;
         for (int i = 0; i<email.amount_of_attachments;i++) {
-            char tmp[ATTACHMENT_SIZE/email.amount_of_attachments];
+            char tmp[ATTACHMENT_SIZE-1];
             char* attachment_buffer = read_attachment_b64(email.attachments[i].filepath);
             if (attachment_buffer != NULL) {
                 if (strlen(attachment_buffer) > 0) {
@@ -133,15 +133,17 @@ char* compose_email(Email email,int force) {
                 char* encoding = "Content-Transfer-Encoding: base64\r\n";
 
                 /* add to attachment content ready to be appended to email payload */
-                snprintf(tmp,ATTACHMENT_SIZE/email.amount_of_attachments,
+                snprintf(tmp,ATTACHMENT_SIZE-1,
+                        "\r\n--%s\r\n"
                         "Content-Type: %s;\r\n"
                         "Content-Disposition: attachment;\r\n"
                         "\tfilename=\"%s\"\r\n"
                          "%s\r\n"
                         "\r\n"
                         "%s\r\n"
-                        "--%s\r\n",
-                        get_content_type(email.attachments[i].filetype),email.attachments[i].name,encoding,attachment_buffer,boundary_text);
+                        "\r\n"
+                        "\r\n--%s\r\n",
+                        boundary_text,get_content_type(email.attachments[i].filetype),email.attachments[i].name,encoding,attachment_buffer,boundary_text);
 
                 free(attachment_buffer);
 
@@ -226,14 +228,21 @@ char* compose_email(Email email,int force) {
             "--%s\r\n"
             "Content-Type: text/plain;\r\n"
             "\r\n"
-            "%s\r\n"
-            "\r\n--%s"
-             "\r\n",
-            addressesLine, fromLine, ccaddressesLine, boundary_text, email.subject,boundary_text,email.body,boundary_text);
+            "%s\r\n",
+            addressesLine, fromLine, ccaddressesLine, boundary_text, email.subject,boundary_text,email.body);
 
 
     if (email.amount_of_attachments > 0 && sendAttachments) {
         strcat(payload_text,attachment_content);
+    }
+    else {
+        char tmp[100];
+        memset(tmp, '\0', sizeof(tmp));
+        sprintf(tmp, 
+            "--%s\r\n"
+             "\r\n",
+                boundary_text);
+        strcat(payload_text,tmp);
     }
 
     return payload_text;
