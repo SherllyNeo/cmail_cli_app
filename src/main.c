@@ -37,8 +37,6 @@ const char help[] = "\nsimplex mailer \n---------------------- \n\n \
                      ";
 
 int main(int argc, char* argv[]) {
-    printf("\n%s\n\n",banner);
-
 
     /* check envrioment is correct */
     char* EMAIL_PASS = getenv("EMAIL_PASS");
@@ -73,7 +71,7 @@ int main(int argc, char* argv[]) {
     char* bcc_addresses_arg = NULL;
     char* subject = NULL;
     char* body = NULL;
-    char* attachments_ = NULL;
+    char* attachments_arg = NULL;
     int force = 0;
 
     for (int i=1;i<argc;i++) {
@@ -98,7 +96,7 @@ int main(int argc, char* argv[]) {
             body = argv[++i];
         }
         else if (!strcmp("-a",current_arg) || !strcmp("--attachment_paths",current_arg)) {
-            attachments_ = argv[++i];
+            attachments_arg = argv[++i];
         }
         else if (!strcmp("-f",current_arg) || !strcmp("--force",current_arg)) {
             force = 1;
@@ -140,8 +138,9 @@ int main(int argc, char* argv[]) {
         bcc_addresses_amount = parserParseAddresses(bcc_addresses_arg, bccaddresses,"BCC");
     }
 
-    if (attachments_) {
-        attachment_amount = parserParseAttachments(attachments_, attachments);
+
+    if (attachments_arg) {
+        attachment_amount = parserParseAttachments(attachments_arg, attachments);
     }
 
     if (addresses_amount <= 0 ) {
@@ -154,7 +153,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if (attachment_amount <= 0 && attachments_ && !force) {
+    if (attachment_amount <= 0 && attachments_arg && !force) {
         fprintf(stderr,"\nERROR: No valid attachments and no permission to send without them using -f\n");
         exit(EXT_ARG_PARSING);
     }
