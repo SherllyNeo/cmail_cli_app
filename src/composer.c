@@ -184,7 +184,6 @@ char* composerComposeEmail(Email email,int force) {
                     boundary_text,get_content_type(email.attachments[i].filetype),email.attachments[i].name,encoding,attachment_buffer,boundary_text);
 
             bool attach = false;
-            printf("TMP: %s\n",tmp);
             if (total_attachsize_so_far >= TOTAL_MAX_ATTACH_SIZE) {
                 fprintf(stderr,"[-] unable to load all content from %s as the attachment size limit has been reached (%zu bytes). Limit is %d MB\n",email.attachments[i].filepath,total_attachsize_so_far,TOTAL_MAX_ATTACH_SIZE/1000000);
             }
