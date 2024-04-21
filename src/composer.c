@@ -113,13 +113,13 @@ char* compose_email(Email email,int force) {
 
     char* boundary_text = "XXXXboundary text";
     bool sendAttachments = false;
-    char attachment_content[ATTACHMENT_SIZE*MAX_ADDR_AMOUNT];
+    char attachment_content[ATTACHMENT_SIZE*MAX_ADDR_AMOUNT] = { 0 };
 
     /* loop over attachs if they exist and make text to add to email payload */
     if (email.amount_of_attachments > 0) {
         int attachmentsParsed = 0;
         for (int i = 0; i<email.amount_of_attachments;i++) {
-            char tmp[ATTACHMENT_SIZE-1];
+            char tmp[ATTACHMENT_SIZE-1] = { 0 };
             char* attachment_buffer = read_attachment_b64(email.attachments[i].filepath);
             if (attachment_buffer != NULL) {
                 if (strlen(attachment_buffer) > 0) {
@@ -174,12 +174,12 @@ char* compose_email(Email email,int force) {
     }
 
     /* compose addresses as csv strings */
-    char addressesLine[TO_SIZE];
-    char ccaddressesLine[CC_SIZE];
-    char bccaddressesLine[BCC_SIZE];
+    char addressesLine[TO_SIZE] = { 0 };
+    char ccaddressesLine[CC_SIZE] = { 0 };
+    char bccaddressesLine[BCC_SIZE] = { 0 };
 
     for (int a = 0;a < email.amount_of_addresses; a++) {
-        char tmp[TO_SIZE/email.amount_of_addresses];
+        char tmp[TO_SIZE] = { 0 };
         if (strlen(email.addresses[a].name) > 0) {
             sprintf(tmp, " %s <%s>%s",email.addresses[a].name,email.addresses[a].address,a == (email.amount_of_addresses - 1) ? "" : ",");
         }
@@ -189,7 +189,7 @@ char* compose_email(Email email,int force) {
         strcat(addressesLine, tmp);
     }
     for (int a = 0;a < email.amount_of_ccaddresses; a++) {
-        char tmp[TO_SIZE/email.amount_of_ccaddresses];
+        char tmp[CC_SIZE] = { 0 };
         if (strlen(email.ccaddresses[a].name) > 0) {
             sprintf(tmp, " %s <%s>%s",email.ccaddresses[a].name,email.ccaddresses[a].address,a == (email.amount_of_ccaddresses - 1) ? "" : ",");
         }
@@ -199,7 +199,7 @@ char* compose_email(Email email,int force) {
         strcat(ccaddressesLine, tmp);
     }
     for (int a = 0;a < email.amount_of_bccaddresses; a++) {
-        char tmp[TO_SIZE/email.amount_of_bccaddresses];
+        char tmp[BCC_SIZE] = { 0 };
         if (strlen(email.bccaddresses[a].name) > 0) {
             sprintf(tmp, " %s <%s>%s",email.bccaddresses[a].name,email.bccaddresses[a].address,a == (email.amount_of_bccaddresses - 1) ? "" : ",");
         }
@@ -208,7 +208,7 @@ char* compose_email(Email email,int force) {
         }
         strcat(bccaddressesLine, tmp);
     }
-    char fromLine[FROM_SIZE];
+    char fromLine[FROM_SIZE] = { 0 };
     sprintf(fromLine,"%s <%s>",email.fromUser,email.fromUsername);
     /* composed addresses as csv strings and set from */
 
@@ -236,8 +236,7 @@ char* compose_email(Email email,int force) {
         strcat(payload_text,attachment_content);
     }
     else {
-        char tmp[100];
-        memset(tmp, '\0', sizeof(tmp));
+        char tmp[100] = { 0 };
         sprintf(tmp, 
             "--%s\r\n"
              "\r\n",

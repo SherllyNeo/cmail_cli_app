@@ -85,7 +85,6 @@ void send_email(Email email,int force,char* user,char* username, char* smtp,char
                 fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res_));
             }
             else {
-                printf("payload %s\n",payload_text);
                 time_t t = time(NULL);
                 struct tm *tm = localtime(&t);
                 printf("\n[+] sent email (%s) at: %s\nto:%s",email.subject,asctime(tm),sentAddresses);
