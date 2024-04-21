@@ -36,6 +36,95 @@ char* read_attachment(char* file_path) {
 
 char base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
+/* buffer needs to be freed */
+char* base64_encode(char* buffer,size_t length) {
+    /* 
+     Made function super verbose with variables to avoid excessive comments, this is a simple base64 encoder
+     It adds 1/3 to the input
+
+     See this video for more details: https://www.youtube.com/watch?v=aUdKd0IFl34
+
+    example:
+        ASCII:                  A           B           C 
+        Binary:             (01000001) (01000010) (01000011)
+        B64Binary:          (010000) (010100) (001001) (000011)
+        Base64 encoded:         Q        U      J         D
+        
+      at the end we pad with == or = depending on if there are one or two characters left over
+     */
+
+    char base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    /* We turn every 3 bytes into 4 base64 chars, rounding up */
+    size_t encoded_size = ((length + 2) / 3) * 4; 
+
+    char* base64_content = (char*)malloc(encoded_size + 1);  /* don't get those off by one errors */
+    if (!base64_content) {
+        fprintf(stderr, "Failed to allocate memory for Base64 content\n");
+        free(buffer);
+        return NULL;
+    }
+
+    /* time to encode */
+    size_t out_len = 0;
+    for (int i = 0; i < (int)length; i += 3) {
+        /* input 3 bytes from buffer, and output 4 base64 enc*/
+        unsigned char input[3], output[4];
+        int remaining = length - i;
+
+        for (int j = 0; j < 3; j++) {
+            /* copy 3 characters from the buffer into input, padding with 0s if required */
+            input[j] = (i + j < (int)length) ? buffer[i + j] : 0;
+        }
+
+        unsigned char firstByte = input[0];
+        unsigned char secondByte = input[1];
+        unsigned char thirdByte = input[2];
+
+        /* group 1 */
+        unsigned char firstByteFirstSixBits = firstByte >> 2;
+        unsigned char groupOne = firstByteFirstSixBits;
+
+        /* group 2 */
+        unsigned char firstByteLastTwoBits = firstByte & 0x03;
+        unsigned char firstByteLastTwoBitsShiftedLeftToMakeRoomForTheNextFour = firstByteLastTwoBits << 4;
+        unsigned char secondByteFirstFourBits = secondByte & 0xf0;
+        unsigned char secondByteFirstFourBitsShiftedRightToMakeRoomForPreviousTwo = secondByteFirstFourBits >> 4;
+        unsigned char groupTwo = firstByteLastTwoBitsShiftedLeftToMakeRoomForTheNextFour | secondByteFirstFourBitsShiftedRightToMakeRoomForPreviousTwo;  
+
+        /* group 3 */
+        unsigned char secondByteLastFourBits = secondByte & 0x0f;
+        unsigned char secondByteLastFourBitsShiftedLeftToMakeRoomForNextTwo = secondByteLastFourBits << 2;
+        unsigned char thirdBytefirstTwoBits = thirdByte & 0xc0;
+        unsigned char thirdBytefirstTwoBitsShiftedRightToMakeRoomForPreviousFourBits = thirdBytefirstTwoBits >> 6;
+
+        unsigned char groupThree = secondByteLastFourBitsShiftedLeftToMakeRoomForNextTwo | thirdBytefirstTwoBitsShiftedRightToMakeRoomForPreviousFourBits;
+
+        /*group 4 */
+        unsigned char thirdByteLastSixBits = thirdByte & 0x3f;
+        unsigned char groupFour = thirdByteLastSixBits;
+
+
+
+        output[0] = base64_table[groupOne];
+
+        output[1] = base64_table[groupTwo];
+
+        output[2] = (remaining > 1) ? base64_table[groupThree] : '=';
+
+        output[3] = (remaining > 2) ? base64_table[groupFour] : '=';
+
+        for (int j = 0; j < 4; j++) {
+            base64_content[out_len++] = output[j];
+        }
+    }
+
+    base64_content[out_len] = '\0'; 
+
+
+    return base64_content;
+}
+
+
 char* read_attachment_b64(const char* file_path) {
     FILE* file = fopen(file_path, "rb");
     if (!file) {
@@ -47,7 +136,7 @@ char* read_attachment_b64(const char* file_path) {
     long file_size = ftell(file);
     rewind(file);
 
-    char* buffer = (char*)malloc(file_size);
+    char* buffer = (char*)malloc(file_size+1);
     if (!buffer) {
         fprintf(stderr, "Failed to allocate memory for file content\n");
         fclose(file);
@@ -57,44 +146,11 @@ char* read_attachment_b64(const char* file_path) {
     fread(buffer, 1, file_size, file);
     fclose(file);
 
+    char* base64_content = base64_encode(buffer,file_size);
     // Calculate the size of the Base64-encoded buffer
-    size_t encoded_size = ((file_size + 2) / 3) * 4; // 4/3 * input_size rounded up
 
-    // Allocate memory for the Base64-encoded string
-    char* base64_content = (char*)malloc(encoded_size + 1); // +1 for null terminator
-    if (!base64_content) {
-        fprintf(stderr, "Failed to allocate memory for Base64 content\n");
-        free(buffer);
-        return NULL;
-    }
-
-    // Base64 encode the buffer
-    size_t out_len = 0;
-    for (int i = 0; i < file_size; i += 3) {
-        unsigned char input[3], output[4];
-        int remaining = file_size - i;
-
-        for (int j = 0; j < 3; j++) {
-            input[j] = (i + j < file_size) ? buffer[i + j] : 0;
-        }
-
-        output[0] = base64_table[input[0] >> 2];
-        output[1] = base64_table[((input[0] & 0x03) << 4) | ((input[1] & 0xf0) >> 4)];
-        output[2] = (remaining > 1) ? base64_table[((input[1] & 0x0f) << 2) | ((input[2] & 0xc0) >> 6)] : '=';
-        output[3] = (remaining > 2) ? base64_table[input[2] & 0x3f] : '=';
-
-        for (int j = 0; j < 4; j++) {
-            base64_content[out_len++] = output[j];
-        }
-    }
-
-    base64_content[out_len] = '\0'; // Null-terminate the string
-
-    free(buffer);
     return base64_content;
 }
-
-
 
 const char* get_content_type(fileType file_extension) {
     switch (file_extension) {
@@ -243,6 +299,8 @@ char* compose_email(Email email,int force) {
                 boundary_text);
         strcat(payload_text,tmp);
     }
+
+    printf("%s\n",payload_text);
 
     return payload_text;
 }
