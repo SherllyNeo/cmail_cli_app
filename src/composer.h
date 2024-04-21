@@ -1,11 +1,8 @@
 #ifndef COMP
 #define COMP
-#include "primitives.h"
+#include "shared.h"
 #include "composer.c"
 
-
-
-char* compose_email(Email email,int force);
-
+char* composerComposeEmail(Email email,int force);
 
 #endif

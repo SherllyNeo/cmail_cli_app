@@ -4,13 +4,13 @@
 #include <curl/curl.h>
 #include <time.h>
 #include <stdbool.h>
-#include "primitives.h"
+#include "shared.h"
 
 
-char* read_attachment(char* file_path,size_t* file_size) {
-    FILE* file = fopen(file_path, "rb");
+char* read_attachment(char* filepath,size_t* file_size) {
+    FILE* file = fopen(filepath, "rb");
     if (!file) {
-        fprintf(stderr, "Failed to open file: %s\n", file_path);
+        fprintf(stderr, "Failed to open file: %s\n", filepath);
         return NULL;
     }
 
@@ -36,7 +36,7 @@ char* read_attachment(char* file_path,size_t* file_size) {
 char base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* buffer needs to be freed */
-char* base64_encode(char* buffer,size_t length,size_t* encodedlen) {
+char* base64EncodeFunc(char* buffer,size_t length,size_t* encodedlen) {
     /* 
      Made function super verbose with variables to avoid excessive comments, this is a simple base64 encoder
      It adds 1/3 to the input
@@ -125,9 +125,9 @@ char* base64_encode(char* buffer,size_t length,size_t* encodedlen) {
 }
 
 
-char* read_attachment_encoded(char* file_path,size_t* file_size,char*(*encoder)(char*,size_t,size_t*)) {
+char* readAttachmentEncoded(char* filepath,size_t* file_size,char*(*encoder)(char*,size_t,size_t*)) {
 
-    char* content = read_attachment(file_path,file_size);
+    char* content = read_attachment(filepath,file_size);
 
     char* encoded_content = encoder(content,*file_size,file_size);
 
@@ -146,11 +146,12 @@ const char* get_content_type(fileType file_extension) {
     return "octet-stream";
 }
 
+/* PUBLIC FUNCTIONS - preappended with composer to show which file it came from */
 
-char* compose_email(Email email,int force) {
+char* composerComposeEmail(Email email,int force) {
 
     char* boundary_text = "XXXXboundary text";
-    bool sendAttachments = false;
+    bool send_attachments = false;
     char attachment_content[TOTAL_MAX_ATTACH_SIZE] = { 0 };
     size_t total_attachsize_so_far = 0;
 
@@ -160,7 +161,7 @@ char* compose_email(Email email,int force) {
         for (int i = 0; i<email.amount_of_attachments;i++) {
             /* attachment_size will fill up with the size of the content */
             size_t attachment_size = 0;
-            char* attachment_buffer = read_attachment_encoded(email.attachments[i].filepath,&attachment_size,&base64_encode);
+            char* attachment_buffer = readAttachmentEncoded(email.attachments[i].filepath,&attachment_size,&base64EncodeFunc);
             int padding = 100; /* Padding so we don't copy too much into tmp  */
             char* tmp = malloc((attachment_size+padding*5)*sizeof(char));
             memset(tmp,'\0',(attachment_size+padding*5)*sizeof(char));
@@ -206,12 +207,12 @@ char* compose_email(Email email,int force) {
         /* check parsing success */
         if (email.amount_of_attachments == attachmentsParsed) {  
             printf("[+] Retrieved all %d attachments content",email.amount_of_attachments);
-            sendAttachments = true;
+            send_attachments = true;
         }
         else {
             printf("[-] failed to load %d/%d attachments content, ",email.amount_of_attachments-attachmentsParsed,email.amount_of_attachments);
             if (force && (attachmentsParsed > 0)) {
-                sendAttachments = true;
+                send_attachments = true;
                 printf("sending anyway due to --force");
             }
             else {
@@ -281,7 +282,7 @@ char* compose_email(Email email,int force) {
             addressesLine, fromLine, ccaddressesLine, boundary_text, email.subject,boundary_text,email.body);
 
 
-    if (email.amount_of_attachments > 0 && sendAttachments) {
+    if (email.amount_of_attachments > 0 && send_attachments) {
         strcat(payload_text,attachment_content);
     }
     else {

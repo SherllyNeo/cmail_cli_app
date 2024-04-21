@@ -1,4 +1,4 @@
-CFLAGS = -g3 -O -Wall -W -pedantic -std=c99 
+CFLAGS = -g3 -O -Wall -W -pedantic -std=c99
 LDFLAGS = -L/opt/vc/lib
 LDLIBS =  -lcurl
 

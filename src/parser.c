@@ -6,7 +6,16 @@
 #include <string.h>
 #include <ctype.h>
 #include <libgen.h>
-#include "primitives.h"
+#include "shared.h"
+
+
+
+
+
+
+
+
+
 
 void remove_spaces (char* str_trimmed, char* str_untrimmed)
 {
@@ -73,7 +82,7 @@ int countCommas(const char *str) {
     return count;
 }
 
-Address initAddress(char* addressStr, char* nameStr, char* addressTypeStr) {
+Address parserInitAddress(char* addressStr, char* nameStr, char* addressTypeStr) {
     Address returnAddress; 
     AddressType addressType;
     returnAddress.valid = false;
@@ -139,7 +148,7 @@ void get_file_type(const char* filename, char* typebuffer, size_t buffer_size) {
     }
 }
 
-Attachment initAttachment(char* filepathStr, char* nameStr) {
+Attachment parserInitAttachment(char* filepathStr, char* nameStr) {
     Attachment returnAttachment; 
     fileType AttachmentType;
     returnAttachment.valid = false;
@@ -217,86 +226,6 @@ void printAttachment(Attachment at) {
 
 
 
-int parseAddresses(const char* input,Address addresses[MAX_ADDR_AMOUNT], char* type) {
-    int valid_addresses = 0;
-    int num_addresses = countCommas(input) + 1;
-    memset(addresses,0,sizeof(Address)*num_addresses+1);
-
-    int address_index = 0;
-    char* token;
-    char* copy = malloc(sizeof(char)*strlen(input)*2);
-    strcpy(copy,input);
-
-
-    token = strtok(copy, ",");
-
-    while (token != NULL) {
-        char* separator = strchr(token, ':');
-        char* name = "";
-        Address result;
-        if (separator != NULL) {
-            *separator = '\0'; 
-            name = separator + 1;
-        }
-        
-        result = initAddress(token, name, type);
-
-
-        if (!result.valid) {
-            fprintf(stderr,"\nSKIPPING: issue with address %s\n",token);
-            token = strtok(NULL, ",");
-            continue;
-        }
-        else {
-            addresses[address_index] = result;
-            valid_addresses++;
-        }
-        address_index++;
-        token = strtok(NULL, ",");
-    }
-    free(copy);
-    return valid_addresses;
-}
-
-int parseAttachments(const char* input,Attachment attachments[MAX_ATTACH_AMOUNT]) {
-    /* returns the amount of valid attachments */
-    int valid_attachments = 0;
-    int num_attachments = countCommas(input) + 1;
-    memset(attachments,0,sizeof(Attachment)*num_attachments+1);
-
-    int attachment_index = 0;
-    char* token;
-    char* copy = malloc(sizeof(char)*strlen(input)*2);
-    strcpy(copy,input);
-
-
-    token = strtok(copy, ",");
-
-    while (token != NULL) {
-        char* separator = strchr(token, ':');
-        char* name = "";
-        Attachment result;
-        if (separator != NULL) {
-            *separator = '\0'; 
-            name = separator + 1;
-        }
-
-        result = initAttachment(token, name);
-        if (!result.valid) {
-            fprintf(stderr,"\nSKIPPING: issue with attachment %s, skipping\n",token);
-            token = strtok(NULL, ",");
-            continue;
-        }
-        else {
-            attachments[attachment_index] = result;
-            valid_attachments++;
-        }
-        attachment_index++;
-        token = strtok(NULL, ",");
-    }
-    free(copy);
-    return valid_attachments;
-}
 
 void printEmail(Email e) {
     printf("sending to:\n");
@@ -322,7 +251,11 @@ void printEmail(Email e) {
 }
 
 
-Email initEmail(char* fromUser, char* fromUsername, Address addresses[MAX_ADDR_AMOUNT],int amount_of_addresses,Address ccaddresses[MAX_ADDR_AMOUNT],int amount_of_ccaddresses,Address bccaddresses[MAX_ADDR_AMOUNT],int amount_of_bccaddresses,Attachment attachments[MAX_ATTACH_AMOUNT],int amount_of_attachments,char subject[MAX_SUBJECT_LENGTH],char body[MAX_SUBJECT_LENGTH]) {
+
+
+/* PUBLIC FUNCTIONS - preappended with parser to show which file it came from */
+
+Email parserInitEmail(char* fromUser, char* fromUsername, Address addresses[MAX_ADDR_AMOUNT],int amount_of_addresses,Address ccaddresses[MAX_ADDR_AMOUNT],int amount_of_ccaddresses,Address bccaddresses[MAX_ADDR_AMOUNT],int amount_of_bccaddresses,Attachment attachments[MAX_ATTACH_AMOUNT],int amount_of_attachments,char subject[MAX_SUBJECT_LENGTH],char body[MAX_SUBJECT_LENGTH]) {
     Email returnEmail;
 
     returnEmail.amount_of_addresses = amount_of_addresses;
@@ -351,5 +284,83 @@ Email initEmail(char* fromUser, char* fromUsername, Address addresses[MAX_ADDR_A
     return returnEmail;
 }
 
+int parserParseAddresses(const char* input,Address addresses[MAX_ADDR_AMOUNT], char* type) {
+    int valid_addresses = 0;
+    int num_addresses = countCommas(input) + 1;
+    memset(addresses,0,sizeof(Address)*num_addresses+1);
+
+    int address_index = 0;
+    char* token;
+    char* copy = malloc(sizeof(char)*strlen(input)*2);
+    strcpy(copy,input);
 
 
+    token = strtok(copy, ",");
+
+    while (token != NULL) {
+        char* separator = strchr(token, ':');
+        char* name = "";
+        Address result;
+        if (separator != NULL) {
+            *separator = '\0'; 
+            name = separator + 1;
+        }
+        
+        result = parserInitAddress(token, name, type);
+
+
+        if (!result.valid) {
+            fprintf(stderr,"\nSKIPPING: issue with address %s\n",token);
+            token = strtok(NULL, ",");
+            continue;
+        }
+        else {
+            addresses[address_index] = result;
+            valid_addresses++;
+        }
+        address_index++;
+        token = strtok(NULL, ",");
+    }
+    free(copy);
+    return valid_addresses;
+}
+
+int parserParseAttachments(const char* input,Attachment attachments[MAX_ATTACH_AMOUNT]) {
+    /* returns the amount of valid attachments */
+    int valid_attachments = 0;
+    int num_attachments = countCommas(input) + 1;
+    memset(attachments,0,sizeof(Attachment)*num_attachments+1);
+
+    int attachment_index = 0;
+    char* token;
+    char* copy = malloc(sizeof(char)*strlen(input)*2);
+    strcpy(copy,input);
+
+
+    token = strtok(copy, ",");
+
+    while (token != NULL) {
+        char* separator = strchr(token, ':');
+        char* name = "";
+        Attachment result;
+        if (separator != NULL) {
+            *separator = '\0'; 
+            name = separator + 1;
+        }
+
+        result = parserInitAttachment(token, name);
+        if (!result.valid) {
+            fprintf(stderr,"\nSKIPPING: issue with attachment %s, skipping\n",token);
+            token = strtok(NULL, ",");
+            continue;
+        }
+        else {
+            attachments[attachment_index] = result;
+            valid_attachments++;
+        }
+        attachment_index++;
+        token = strtok(NULL, ",");
+    }
+    free(copy);
+    return valid_attachments;
+}

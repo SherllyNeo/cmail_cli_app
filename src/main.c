@@ -6,7 +6,7 @@
 #include <string.h>
 #include <libgen.h>
 #include "parser.h"
-#include "primitives.h"
+#include "shared.h"
 #include "mail.h"
 
 const char banner[] = "\n \
@@ -20,12 +20,12 @@ const char banner[] = "\n \
 
 const char help[] = "\nsimplex mailer \n---------------------- \n\n \
                      -h or --help to view help\n \
-                     -t or --toAddrs sets the to addresses\n \
-                     -cc or --ccAddrs sets CC addresses\n \
-                     -bc or --bccAddrs sets BCC addresses\n \
+                     -t or --to_addresses sets the to addresses\n \
+                     -c or --carbon_copy_addresses sets CC addresses\n \
+                     -bc or --blind_carbon_copy_addresses BCC addresses\n \
                      -s or --subject sets subject\n \
                      -b or --body sets body\n \
-                     -a or --attachment_path\n \
+                     -a or --attachment_paths\n \
                      Attachment name will default to attachment path name if not specified\n \
                      -f  or --force alone will ensure email is sent without an attachment if an attachment isn't found. rather than exiting\n \
                      \n \
@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
     char* EMAIL_USERNAME = getenv("EMAIL_USERNAME");
     char* EMAIL_USER = getenv("EMAIL_USER");
     char* EMAIL_SMTP = getenv("EMAIL_SMTP");
+
     if (EMAIL_PASS == NULL) {
         fprintf(stderr, "unable to get EMAIL_PASS, please set in envrioment");
         exit(ERR_ENV_PARSING);
@@ -67,9 +68,9 @@ int main(int argc, char* argv[]) {
     if (EMAIL_USER && EMAIL_USERNAME && EMAIL_PASS && EMAIL_SMTP) {
         printf("[+] Retrieved enviroment variables\n");
     }
-    char* toAddrs = NULL;
-    char* ccAddrs = NULL;
-    char* bccAddrs = NULL;
+    char* to_addresses_arg = NULL;
+    char* cc_addresses_arg = NULL;
+    char* bcc_addresses_arg = NULL;
     char* subject = NULL;
     char* body = NULL;
     char* attachments_ = NULL;
@@ -81,14 +82,14 @@ int main(int argc, char* argv[]) {
             printf("\n%s\n",help);
             return 0;
         }
-        else if (!strcmp("-t",current_arg) || !strcmp("--toAddrs",current_arg)) {
-            toAddrs = argv[++i];
+        else if (!strcmp("-t",current_arg) || !strcmp("--to_addresses",current_arg)) {
+            to_addresses_arg = argv[++i];
         }
-        else if (!strcmp("-cc",current_arg) || !strcmp("--ccAddrs",current_arg)) {
-            ccAddrs = argv[++i];
+        else if (!strcmp("-cc",current_arg) || !strcmp("--carbon_copy_addresses",current_arg)) {
+            cc_addresses_arg = argv[++i];
         }
-        else if (!strcmp("-bc",current_arg) || !strcmp("--bccAddrs",current_arg)) {
-            bccAddrs = argv[++i];
+        else if (!strcmp("-bc",current_arg) || !strcmp("--blind_carbon_copy_addresses",current_arg)) {
+            bcc_addresses_arg = argv[++i];
         }
         else if (!strcmp("-s",current_arg) || !strcmp("--subject",current_arg)) {
             subject = argv[++i];
@@ -96,7 +97,7 @@ int main(int argc, char* argv[]) {
         else if (!strcmp("-b",current_arg) || !strcmp("--body",current_arg)) {
             body = argv[++i];
         }
-        else if (!strcmp("-a",current_arg) || !strcmp("--attachments",current_arg)) {
+        else if (!strcmp("-a",current_arg) || !strcmp("--attachment_paths",current_arg)) {
             attachments_ = argv[++i];
         }
         else if (!strcmp("-f",current_arg) || !strcmp("--force",current_arg)) {
@@ -105,7 +106,7 @@ int main(int argc, char* argv[]) {
     }
 
     /* check requirements */
-    if (!toAddrs && !bccAddrs) {
+    if (!to_addresses_arg && !bcc_addresses_arg) {
         printf("\nNo to addresses found \n%s\n",help);
         fprintf(stderr,"\nERROR: Too few arguments. Need at least sending address or blind carbon copy address\n");
         exit(EXT_ARG_PARSING);
@@ -122,29 +123,29 @@ int main(int argc, char* argv[]) {
     Address ccaddresses[MAX_ADDR_AMOUNT];
     Address bccaddresses[MAX_ADDR_AMOUNT];
     Attachment attachments[MAX_ATTACH_AMOUNT];
-    int addrsAmount = 0;
-    int ccaddrsAmount = 0;
-    int bccaddrsAmount = 0;
-    int attachmentsAmount = 0;
+    int addresses_amount = 0;
+    int cc_addresses_amount = 0;
+    int bcc_addresses_amount = 0;
+    int attachment_amount = 0;
 
-    if (toAddrs) {
-        addrsAmount = parseAddresses(toAddrs, addresses,"TO");
+    if (to_addresses_arg) {
+        addresses_amount = parserParseAddresses(to_addresses_arg, addresses,"TO");
     }
 
-    if (ccAddrs) {
-        ccaddrsAmount = parseAddresses(ccAddrs, ccaddresses,"CC");
+    if (cc_addresses_arg) {
+        cc_addresses_amount = parserParseAddresses(cc_addresses_arg, ccaddresses,"CC");
     }
 
-    if (bccAddrs) {
-        bccaddrsAmount = parseAddresses(bccAddrs, bccaddresses,"BCC");
+    if (bcc_addresses_arg) {
+        bcc_addresses_amount = parserParseAddresses(bcc_addresses_arg, bccaddresses,"BCC");
     }
 
     if (attachments_) {
-        attachmentsAmount = parseAttachments(attachments_, attachments);
+        attachment_amount = parserParseAttachments(attachments_, attachments);
     }
 
-    if (addrsAmount <= 0 ) {
-        if (bccAddrs && bccaddrsAmount >= 0) {
+    if (addresses_amount <= 0 ) {
+        if (bcc_addresses_arg && bcc_addresses_amount >= 0) {
             printf("INFO: No to addresses, but sending to all blind carbon copies\n");
         }
         else {
@@ -153,24 +154,24 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if (attachmentsAmount <= 0 && attachments_ && !force) {
+    if (attachment_amount <= 0 && attachments_ && !force) {
         fprintf(stderr,"\nERROR: No valid attachments and no permission to send without them using -f\n");
         exit(EXT_ARG_PARSING);
     }
 
-    if ((addrsAmount+ccaddrsAmount+bccaddrsAmount) > MAX_ADDR_AMOUNT) {
+    if ((addresses_amount+cc_addresses_amount+bcc_addresses_amount) > MAX_ADDR_AMOUNT) {
         fprintf(stderr,"\nERROR: Too many to email addresses\n");
         exit(EXT_ARG_PARSING);
     }
-    if (attachmentsAmount > MAX_ATTACH_AMOUNT) {
+    if (attachment_amount > MAX_ATTACH_AMOUNT) {
         fprintf(stderr,"\nERROR: Too many to attachments\n");
         exit(EXT_ARG_PARSING);
     }
 
     printf("[+] Parsed addresses\n");
-    Email email = initEmail(EMAIL_USERNAME,EMAIL_USER,addresses,addrsAmount,ccaddresses,ccaddrsAmount,bccaddresses,bccaddrsAmount,attachments,attachmentsAmount,subject,body);
+    Email email = parserInitEmail(EMAIL_USERNAME,EMAIL_USER,addresses,addresses_amount,ccaddresses,cc_addresses_amount,bccaddresses,bcc_addresses_amount,attachments,attachment_amount,subject,body);
     printf("[+] Created email\n");
-    send_email(email,force, EMAIL_USER,EMAIL_USERNAME, EMAIL_SMTP, EMAIL_PASS);
+    mailSendEmail(email,force, EMAIL_USER,EMAIL_USERNAME, EMAIL_SMTP, EMAIL_PASS);
     printf("\n[+] Done :)\n");
 
     return EXIT_SUCCESS;

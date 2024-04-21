@@ -1,6 +1,6 @@
 #include <curl/curl.h>
 #include "parser.h"
-#include "primitives.h"
+#include "shared.h"
 #include "composer.h"
 
 
@@ -36,7 +36,7 @@ static size_t payload_source(char *ptr,size_t size,size_t nmemb,void *userp) {
 }
 
 
-void send_email(Email email,int force,char* user,char* username, char* smtp,char* pass) {
+void mailSendEmail(Email email,int force,char* user,char* username, char* smtp,char* pass) {
     
     CURL *curl;
     CURLcode res_ = CURLE_OK;
@@ -68,7 +68,7 @@ void send_email(Email email,int force,char* user,char* username, char* smtp,char
                 strcat(sentAddresses,email.addresses[j].address);
             }
 
-            char* email_txt = compose_email(email, force);
+            char* email_txt = composerComposeEmail(email, force);
             strcpy(payload_text,email_txt);
             free(email_txt);
 
@@ -98,12 +98,11 @@ void send_email(Email email,int force,char* user,char* username, char* smtp,char
         /* send to blind carbon copy emails */
         if (email.amount_of_bccaddresses > 0) {
             for (int i =0; i<email.amount_of_bccaddresses;i++) {
-                Address nextAddr[MAX_ADDR_LENGTH];
-                memset(nextAddr,0,sizeof(Address)*MAX_ADDR_LENGTH);
-                nextAddr[0] = email.bccaddresses[i];
+                Address next_address[MAX_ADDR_LENGTH] = { 0 };
+                next_address[0] = email.bccaddresses[i];
 
-                Email newEmail = initEmail(user, username, nextAddr,1, NULL,0,NULL, 0,email.attachments, email.amount_of_attachments, email.subject, email.body);
-                send_email(newEmail, force, user, username, smtp, pass);
+                Email newEmail = parserInitEmail(user, username, next_address,1, NULL,0,NULL, 0,email.attachments, email.amount_of_attachments, email.subject, email.body);
+                mailSendEmail(newEmail, force, user, username, smtp, pass);
             }
         }
         
