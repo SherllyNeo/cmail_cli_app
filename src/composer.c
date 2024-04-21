@@ -294,7 +294,6 @@ char* composerComposeEmail(Email email,int force) {
         strcat(payload_text,tmp);
     }
 
-    printf("%s\n",payload_text);
     return payload_text;
 }
 

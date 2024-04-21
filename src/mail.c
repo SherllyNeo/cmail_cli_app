@@ -3,14 +3,13 @@
 #include "shared.h"
 #include "composer.h"
 
-
 char payload_text[PAYLOAD_SIZE];
 
 struct upload_status {
     size_t bytes_read;
 };
 
-static size_t payload_source(char *ptr,size_t size,size_t nmemb,void *userp) {
+static size_t payloadSource(char *ptr,size_t size,size_t nmemb,void *userp) {
 
     struct upload_status *upload_ctx = (struct upload_status *)userp;
     const char *data;
@@ -34,6 +33,9 @@ static size_t payload_source(char *ptr,size_t size,size_t nmemb,void *userp) {
 
     return 0;
 }
+
+
+/* PUBLIC FUNCTIONS */
 
 
 void mailSendEmail(Email email,int force,char* user,char* username, char* smtp,char* pass) {
@@ -73,7 +75,7 @@ void mailSendEmail(Email email,int force,char* user,char* username, char* smtp,c
             free(email_txt);
 
             curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
-            curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+            curl_easy_setopt(curl, CURLOPT_READFUNCTION, payloadSource);
             curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
             curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
