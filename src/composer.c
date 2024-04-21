@@ -205,7 +205,7 @@ char* composerComposeEmail(Email email,int force) {
         }
         /* check parsing success */
         if (email.amount_of_attachments == attachmentsParsed) {  
-            printf("[+] Retrieved all %d attachments content",email.amount_of_attachments);
+            printf("[+] Retrieved all %d attachments content\n",email.amount_of_attachments);
             send_attachments = true;
         }
         else {

@@ -84,12 +84,12 @@ void mailSendEmail(Email email,int force,char* user,char* username, char* smtp,c
 
             /* Check for errors */
             if(res_ != CURLE_OK) {
-                fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res_));
+                fprintf(stderr, "ERROR: curl email sending failed: %s\n",curl_easy_strerror(res_));
             }
             else {
                 time_t t = time(NULL);
                 struct tm *tm = localtime(&t);
-                printf("\n[+] sent email (%s) at: %s\nto:%s",email.subject,asctime(tm),sentAddresses);
+                printf("[+] sent email (%s) at: %sto:%s",email.subject,asctime(tm),sentAddresses);
             }
 
             /* Free the list of recipients */

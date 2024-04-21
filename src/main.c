@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
     Email email = parserInitEmail(EMAIL_USERNAME,EMAIL_USER,addresses,addresses_amount,ccaddresses,cc_addresses_amount,bccaddresses,bcc_addresses_amount,attachments,attachment_amount,subject,body);
     printf("[+] Created email\n");
     mailSendEmail(email,force, EMAIL_USER,EMAIL_USERNAME, EMAIL_SMTP, EMAIL_PASS);
-    printf("\n[+] Done :)\n");
+    printf("\n\n[+] Done :)\n");
 
     return EXIT_SUCCESS;
 
