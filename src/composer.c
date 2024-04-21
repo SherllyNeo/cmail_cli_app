@@ -7,7 +7,7 @@
 #include "shared.h"
 
 
-char* read_attachment(char* filepath,size_t* file_size) {
+char* readAttachment(char* filepath,size_t* file_size) {
     FILE* file = fopen(filepath, "rb");
     if (!file) {
         fprintf(stderr, "Failed to open file: %s\n", filepath);
@@ -127,7 +127,7 @@ char* base64EncodeFunc(char* buffer,size_t length,size_t* encodedlen) {
 
 char* readAttachmentEncoded(char* filepath,size_t* file_size,char*(*encoder)(char*,size_t,size_t*)) {
 
-    char* content = read_attachment(filepath,file_size);
+    char* content = readAttachment(filepath,file_size);
 
     char* encoded_content = encoder(content,*file_size,file_size);
 
