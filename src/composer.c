@@ -4,49 +4,8 @@
 #include <curl/curl.h>
 #include <time.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include "primitives.h"
 
-#define SUBJECT_SIZE 500
-#define BODY_SIZE 5000
-#define TO_SIZE 200
-#define FROM_SIZE 500
-#define CC_SIZE 200
-#define BCC_SIZE 200
-#define PAYLOAD_SIZE (SUBJECT_SIZE + BODY_SIZE + ATTACHMENT_SIZE)*3
-
-#define EXT_ATTACHMENT_ERR 5
-#define EXT_EMAIL_ERR 6
-#define EXT_CONNECTION_ERR 7
-
-
-char *base64Encode(const unsigned char *data, size_t input_length, size_t *output_length) {
-    static const char base64_table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-    size_t output_buffer_size = 4 * ((input_length + 2) / 3);
-    char *output = (char *)malloc(output_buffer_size);
-    if (!output) return NULL;
-
-    for (size_t i = 0, j = 0; i < input_length;) {
-        uint32_t octet_a = i < input_length ? (unsigned char)data[i++] : 0;
-        uint32_t octet_b = i < input_length ? (unsigned char)data[i++] : 0;
-        uint32_t octet_c = i < input_length ? (unsigned char)data[i++] : 0;
-
-        uint32_t triple = (octet_a << 0x10) + (octet_b << 0x08) + octet_c;
-
-        output[j++] = base64_table[(triple >> 3 * 6) & 0x3F];
-        output[j++] = base64_table[(triple >> 2 * 6) & 0x3F];
-        output[j++] = base64_table[(triple >> 1 * 6) & 0x3F];
-        output[j++] = base64_table[(triple >> 0 * 6) & 0x3F];
-    }
-
-    for (int i = 0; i < 3 - (int)input_length % 3; i++) {
-        output[output_buffer_size - 1 - i] = '=';
-    }
-
-    *output_length = output_buffer_size;
-    return output;
-}
 
 char* read_attachment(char* file_path) {
     char * buffer = 0;
@@ -75,6 +34,67 @@ char* read_attachment(char* file_path) {
 
 }
 
+char base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+char* read_attachment_b64(const char* file_path) {
+    FILE* file = fopen(file_path, "rb");
+    if (!file) {
+        fprintf(stderr, "Failed to open file: %s\n", file_path);
+        return NULL;
+    }
+
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    rewind(file);
+
+    char* buffer = (char*)malloc(file_size);
+    if (!buffer) {
+        fprintf(stderr, "Failed to allocate memory for file content\n");
+        fclose(file);
+        return NULL;
+    }
+
+    fread(buffer, 1, file_size, file);
+    fclose(file);
+
+    // Calculate the size of the Base64-encoded buffer
+    size_t encoded_size = ((file_size + 2) / 3) * 4; // 4/3 * input_size rounded up
+
+    // Allocate memory for the Base64-encoded string
+    char* base64_content = (char*)malloc(encoded_size + 1); // +1 for null terminator
+    if (!base64_content) {
+        fprintf(stderr, "Failed to allocate memory for Base64 content\n");
+        free(buffer);
+        return NULL;
+    }
+
+    // Base64 encode the buffer
+    size_t out_len = 0;
+    for (int i = 0; i < file_size; i += 3) {
+        unsigned char input[3], output[4];
+        int remaining = file_size - i;
+
+        for (int j = 0; j < 3; j++) {
+            input[j] = (i + j < file_size) ? buffer[i + j] : 0;
+        }
+
+        output[0] = base64_table[input[0] >> 2];
+        output[1] = base64_table[((input[0] & 0x03) << 4) | ((input[1] & 0xf0) >> 4)];
+        output[2] = (remaining > 1) ? base64_table[((input[1] & 0x0f) << 2) | ((input[2] & 0xc0) >> 6)] : '=';
+        output[3] = (remaining > 2) ? base64_table[input[2] & 0x3f] : '=';
+
+        for (int j = 0; j < 4; j++) {
+            base64_content[out_len++] = output[j];
+        }
+    }
+
+    base64_content[out_len] = '\0'; // Null-terminate the string
+
+    free(buffer);
+    return base64_content;
+}
+
+
 
 const char* get_content_type(fileType file_extension) {
     switch (file_extension) {
@@ -100,7 +120,7 @@ char* compose_email(Email email,int force) {
         int attachmentsParsed = 0;
         for (int i = 0; i<email.amount_of_attachments;i++) {
             char tmp[ATTACHMENT_SIZE/email.amount_of_attachments];
-            char* attachment_buffer = read_attachment(email.attachments[i].filepath);
+            char* attachment_buffer = read_attachment_b64(email.attachments[i].filepath);
             if (attachment_buffer != NULL) {
                 if (strlen(attachment_buffer) > 0) {
                     attachmentsParsed++;
@@ -109,21 +129,8 @@ char* compose_email(Email email,int force) {
                     fprintf(stderr,"failed to load content from: %s\n",email.attachments[i].filepath);
                 }
 
-                bool encodingEnabled = false;
-                char encoding[50] = "";
-                size_t pdfContentSize = strlen(attachment_buffer);
-                size_t encodedLength;
-                char *encodedContent = base64Encode((const unsigned char *)attachment_buffer, pdfContentSize, &encodedLength);
-                if (encodedContent && encodingEnabled) {
-                    strcpy(attachment_buffer,encodedContent);
-                    strcpy(encoding,"Content-Transfer-Encoding: base64\r\n");
-                }
-                else {
-                    fprintf(stderr, "[-] Failed to base64 encode content %s.\nUsing raw\n",email.attachments[i].name);
-                    free(encodedContent);
-                }
 
-                printf("attach buffer: %s\n",attachment_buffer);
+                char* encoding = "Content-Transfer-Encoding: base64\r\n";
 
                 /* add to attachment content ready to be appended to email payload */
                 snprintf(tmp,ATTACHMENT_SIZE/email.amount_of_attachments,
@@ -228,6 +235,8 @@ char* compose_email(Email email,int force) {
     if (email.amount_of_attachments > 0 && sendAttachments) {
         strcat(payload_text,attachment_content);
     }
+
+    printf("payload: %s\n",payload_text);
 
     return payload_text;
 }

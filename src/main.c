@@ -9,6 +9,14 @@
 #include "primitives.h"
 #include "mail.h"
 
+const char banner[] = "\n \
+ ____ ___ __  __ ____  _     _______  __  __  __    _    ___ _ \n\
+/ ___|_ _|  \\/  |  _ \\| |   | ____\\ \\/ / |  \\/  |  / \\  |_ _| | \n\
+\\___ \\| || |\\/| | |_) | |   |  _|  \\  /  | |\\/| | / _ \\  | || | \n\
+ ___) | || |  | |  __/| |___| |___ /  \\  | |  | |/ ___ \\ | || |___ \n\
+|____/___|_|  |_|_|   |_____|_____/_/\\_\\ |_|  |_/_/   \\_\\___|_____| \n\
+";
+
 
 const char help[] = "\nsimplex mailer \n---------------------- \n\n \
                      -h or --help to view help\n \
@@ -21,12 +29,15 @@ const char help[] = "\nsimplex mailer \n---------------------- \n\n \
                      Attachment name will default to attachment path name if not specified\n \
                      -f  or --force alone will ensure email is sent without an attachment if an attachment isn't found. rather than exiting\n \
                      \n \
-                     You can write name@example.com:FirstName-MiddleName-Lastname for the email to be sent To: FirstName MiddleName LastName <name@example.com>\n \
-                     You can write attachmentPath.txt:NewAttachmentName.txt for the email to show AttachmentName.txt\n \
+                     You can write \"name@example.com:FirstName MiddleName Lastname\" for the email to be sent To: FirstName MiddleName LastName <name@example.com>\n \
+                     You can write /path/to/attachmentPath.txt:NewAttachmentName.txt for the email to show AttachmentName.txt\n \
+                     \n \
+                     Useage: mailer -s \"subject\" -b \"body\" -t \"user@example.com:user name, user1@example.com: firstname lastname\" -c \"user2@example.com\" -a \"file.pdf\" \n \
+                     This will email as To: user name <user@example.com>, firstname lastname <user1@example.com> and cc in user2@example.com. The email will have subject, \"subject\" and body \"body\" and send the pdf file \n \
                      ";
 
 int main(int argc, char* argv[]) {
-    printf("\nSimplex Mailer\n\n");
+    printf("\n%s\n\n",banner);
 
 
     /* check envrioment is correct */
