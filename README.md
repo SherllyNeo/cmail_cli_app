@@ -31,30 +31,16 @@ And you are done :) it installs to ~/.local/bin/mailer by default.
 
 
 ```bash
-mailer -s "Test Subject" -b "Test body" -t "user@example.com: Firstname Lastname,john.smith@email.com: John Smith" -a "README.md:New file.txt,README.md"
-
-
-  ____ ___ __  __ ____  _     _______  __  __  __    _    ___ _
-/ ___|_ _|  \/  |  _ \| |   | ____\ \/ / |  \/  |  / \  |_ _| |
-\___ \| || |\/| | |_) | |   |  _|  \  /  | |\/| | / _ \  | || |
- ___) | || |  | |  __/| |___| |___ /  \  | |  | |/ ___ \ | || |___
-|____/___|_|  |_|_|   |_____|_____/_/\_\ |_|  |_/_/   \_\___|_____|
-
-
-[+] Retrieved enviroment variables
-
-ERROR: filepath README.md and filename inputted New file.txt do not match file type MD
-
-SKIPPING: issue with attachment README.md, skipping
-[+] Parsed addresses
-[+] Created email
-[+] Retrieved all 1 attachments content
-[+] sent email (Test Subject) at: Sun Apr 21 22:49:33 2024
-to:
-user@example.com
-john.smith@email.com
-
-[+] Done :)
+"Test Subject" -b "Test body" -t "user@example.com: Firstname Lastname,john.smith@email.com: John Smith" -a "README.md:New file.md,test.pdf" 
+[+] Retrieved enviroment variables 
+[+] Parsed addresses 
+[+] Created email 
+[+] Retrieved all 2 attachments content 
+[+] sent email (Test Subject) at: Mon Apr 22 15:32:49 2024 
+to: 
+user@example.com 
+john.smith@email.com 
+[+] Done :) 
 ```
 
 ## Philosophy 
