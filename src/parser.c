@@ -7,13 +7,7 @@
 #include <ctype.h>
 #include <libgen.h>
 #include "shared.h"
-
-
-
-
-
-
-
+#include <wordexp.h>
 
 
 
@@ -151,16 +145,23 @@ void get_file_type(const char* filename, char* typebuffer, size_t buffer_size) {
 Attachment parserInitAttachment(char* filepathStr, char* nameStr) {
     Attachment returnAttachment; 
     fileType AttachmentType;
+    char cleaned_filepath_str[MAX_ADDR_LENGTH] = { 0 };
     returnAttachment.valid = false;
 
+    wordexp_t exp_result;
+    wordexp(filepathStr, &exp_result, 0);
+    sprintf(cleaned_filepath_str,"%s", exp_result.we_wordv[0]);
+    wordfree(&exp_result);
+
     if (strlen(filepathStr) > (MAX_ATTACH_LENGTH - 1)) {
-        fprintf(stderr, "\nERROR: attachment is too long: %s\n", filepathStr);
+        fprintf(stderr, "\nERROR: attachment name is too long: %s\n", filepathStr);
         return returnAttachment;
     }
     if (strlen(nameStr) > (MAX_ADDR_ALIAS_LENGTH - 1)) {
         fprintf(stderr, "\nERROR: name is too long: %s\n", filepathStr);
         return returnAttachment;
     }
+
     /* get file name */
     if (strlen(nameStr) == 0) {
         nameStr = basename(filepathStr);
@@ -170,26 +171,26 @@ Attachment parserInitAttachment(char* filepathStr, char* nameStr) {
 
     /* get file attachment */
     char attachmentTypeStr[MAX_LEN];
-    get_file_type(filepathStr, attachmentTypeStr, sizeof(attachmentTypeStr));
+    get_file_type(cleaned_filepath_str, attachmentTypeStr, sizeof(attachmentTypeStr));
 
     char attachmentTypeStrFromName[MAX_LEN];
     get_file_type(nameStr, attachmentTypeStrFromName, sizeof(attachmentTypeStrFromName));
 
     /* ensure file types agree */
     if (strcmp(attachmentTypeStrFromName,attachmentTypeStr) != 0) {
-        fprintf(stderr, "\nERROR: filepath %s and filename inputted %s do not match file type %s\n",filepathStr,nameStr,attachmentTypeStr);
+        fprintf(stderr, "\nERROR: filepath %s and filename inputted %s do not match file type %s\n",cleaned_filepath_str,nameStr,attachmentTypeStr);
         return returnAttachment;
     }
 
     /* Check if path exists */
     FILE *file;
-    if((file = fopen(filepathStr,"r"))!=NULL)
+    if((file = fopen(cleaned_filepath_str,"r"))!=NULL)
         {
             fclose(file);
         }
     else
         {
-        fprintf(stderr, "\nERROR: filepath %s cannot be opened so likely does not exist\n",filepathStr);
+        fprintf(stderr, "\nERROR: filepath %s cannot be opened so likely does not exist\n",cleaned_filepath_str);
         return returnAttachment;
         }
 
@@ -212,7 +213,7 @@ Attachment parserInitAttachment(char* filepathStr, char* nameStr) {
         AttachmentType = UNKNOWN;
     }
 
-    strcpy(returnAttachment.filepath,filepathStr);
+    strcpy(returnAttachment.filepath,cleaned_filepath_str);
     strcpy(returnAttachment.name,nameStr);
     returnAttachment.filetype = AttachmentType;
     returnAttachment.valid = true;
