@@ -9,7 +9,7 @@ Set these envrioment variables, recommended to use unix pass or similar to keep 
 EMAIL_PASS="$(pass show emailPassword)"
 EMAIL_SMTP=smtp://smtp.google.com:587
 EMAIL_USERNAME="Real name"
-EMAIL_USER="user@gmail..com"
+EMAIL_USER="user@gmail.com"
 ```
 
 In order to do this, you need to get an [app password from google, instructions here](https://support.google.com/accounts/answer/185833?hl=en)
