@@ -1,4 +1,5 @@
 #include <curl/curl.h>
+#include <string.h>
 #include "parser.h"
 #include "shared.h"
 #include "composer.h"
@@ -71,7 +72,7 @@ void mailSendEmail(Email email,int force,char* user,char* username, char* smtp,c
             }
 
             char* email_txt = composerComposeEmail(email, force);
-            strcpy(payload_text,email_txt);
+            strncpy(payload_text,email_txt,PAYLOAD_SIZE);
             free(email_txt);
 
             curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);

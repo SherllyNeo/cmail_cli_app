@@ -33,6 +33,7 @@ char* readAttachment(char* filepath,size_t* file_size) {
 
 }
 
+
 char base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* buffer needs to be freed */
@@ -149,7 +150,6 @@ const char* get_content_type(fileType file_extension) {
 /* PUBLIC FUNCTIONS - preappended with composer to show which file it came from */
 
 char* composerComposeEmail(Email email,int force) {
-
     char* boundary_text = "XXXXboundary text";
     bool send_attachments = false;
     char attachment_content[TOTAL_MAX_ATTACH_SIZE] = { 0 };
@@ -160,18 +160,13 @@ char* composerComposeEmail(Email email,int force) {
         int attachmentsParsed = 0;
         for (int i = 0; i<email.amount_of_attachments;i++) {
             /* attachment_size will fill up with the size of the content */
+            size_t attachment_buffer_size = 0;
             size_t attachment_size = 0;
-            char* attachment_buffer = readAttachmentEncoded(email.attachments[i].filepath,&attachment_size,&base64EncodeFunc);
-            int padding = 100; /* Padding so we don't copy too much into tmp  */
-            char* tmp = malloc((attachment_size+padding*5)*sizeof(char));
-            memset(tmp,'\0',(attachment_size+padding*5)*sizeof(char));
-
+            char* attachment_buffer = readAttachmentEncoded(email.attachments[i].filepath,&attachment_buffer_size,&base64EncodeFunc);
 
 
             char* encoding = "Content-Transfer-Encoding: base64\r\n";
-
-            /* add to attachment content ready to be appended to email payload */
-            sprintf(tmp,
+            attachment_size = snprintf((char *)NULL,0,
                     "\r\n--%s\r\n"
                     "Content-Type: %s;\r\n"
                     "Content-Disposition: attachment;\r\n"
@@ -183,20 +178,41 @@ char* composerComposeEmail(Email email,int force) {
                     "\r\n--%s\r\n",
                     boundary_text,get_content_type(email.attachments[i].filetype),email.attachments[i].name,encoding,attachment_buffer,boundary_text);
 
-            bool attach = false;
-            if (total_attachsize_so_far >= TOTAL_MAX_ATTACH_SIZE) {
-                fprintf(stderr,"[-] unable to load all content from %s as the attachment size limit has been reached (%zu bytes). Limit is %d MB\n",email.attachments[i].filepath,total_attachsize_so_far,TOTAL_MAX_ATTACH_SIZE/1000000);
+            char* tmp = malloc((attachment_size+1)*sizeof(char));
+            memset(tmp,'\0',(attachment_size+1)*sizeof(char));
+
+            /* add to attachment content ready to be appended to email payload */
+            snprintf(tmp,attachment_size,
+                    "\r\n--%s\r\n"
+                    "Content-Type: %s;\r\n"
+                    "Content-Disposition: attachment;\r\n"
+                    "\tfilename=\"%s\"\r\n"
+                    "%s\r\n"
+                    "\r\n"
+                    "%s\r\n"
+                    "\r\n"
+                    "\r\n--%s\r\n",
+                    boundary_text,get_content_type(email.attachments[i].filetype),email.attachments[i].name,encoding,attachment_buffer,boundary_text);
+
+
+            bool attach = true;
+            if ((TOTAL_MAX_ATTACH_SIZE - total_attachsize_so_far) <= attachment_size ) {
+                fprintf(stderr,"[-] unable to load all content from %s as the attachment size limit has been reached (%d bytes). \n\
+                        There was %zu bytes remaining, and we are trying to attach %zu bytes\n"
+                        ,email.attachments[i].filepath,TOTAL_MAX_ATTACH_SIZE,(TOTAL_MAX_ATTACH_SIZE-total_attachsize_so_far), attachment_size);
+                        attach = false;
             }
 
             if (attachment_buffer == NULL || strlen(attachment_buffer) <= 0 || attachment_size <= 0) {
                     fprintf(stderr,"[-] unable to load any content from %s\n",email.attachments[i].filepath);
+                    attach = false;
             }
             free(attachment_buffer);
 
-            attach = true;
             if (attach) {
+                strncat(attachment_content, tmp,MAX_ATTACH_AMOUNT - total_attachsize_so_far);
+                total_attachsize_so_far += attachment_size;
                 attachmentsParsed++;
-                strcat(attachment_content, tmp);
             }
             else {
                 fprintf(stderr,"[-] will not attach %s\n",email.attachments[i].filepath);
@@ -215,7 +231,7 @@ char* composerComposeEmail(Email email,int force) {
                 printf("sending anyway due to --force");
             }
             else {
-                printf("--force is not set, so crashing gracefully");
+                printf("--force is not set, so crashing gracefully\n");
                 exit(EXT_ATTACHMENT_ERR);
             }
             printf("\n");
