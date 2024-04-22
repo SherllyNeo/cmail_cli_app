@@ -84,6 +84,14 @@ This is useful for alerts from a server, simple mailing lists and more.
 
 It is scriptable, UNIX friendly and extensible. 
 
+## TODO
+
+* Signal handling 
+* Man page
+* Portable version with cross platform compilation
+* Retrieving mail from IMAP server in a scriptable way
+* Using above to check if sending has failed on the server side
+
 
 
 
