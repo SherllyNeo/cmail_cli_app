@@ -152,7 +152,13 @@ const char* get_content_type(fileType file_extension) {
 char* composerComposeEmail(Email email,int force) {
     char* boundary_text = "XXXXboundary text";
     bool send_attachments = false;
-    char attachment_content[TOTAL_MAX_ATTACH_SIZE] = { 0 };
+    //char attachment_content[TOTAL_MAX_ATTACH_SIZE] = { 0 };
+    size_t attachment_content_size = TOTAL_MAX_ATTACH_SIZE;
+    char* attachment_content = malloc(attachment_content_size*sizeof(char));
+    if (attachment_content == NULL) {
+        fprintf(stderr,"Unable to allocate attachment content\n");
+        exit(EXT_ATTACHMENT_ERR);
+    }
     size_t total_attachsize_so_far = 0;
 
     /* loop over attachs if they exist and make text to add to email payload */
@@ -196,11 +202,21 @@ char* composerComposeEmail(Email email,int force) {
 
 
             bool attach = true;
-            if ((TOTAL_MAX_ATTACH_SIZE - total_attachsize_so_far) <= attachment_size ) {
-                fprintf(stderr,"[-] unable to load all content from %s as the attachment size limit has been reached (%d bytes). \n\
+            if ((attachment_content_size - total_attachsize_so_far) <= attachment_size ) {
+                fprintf(stderr,"[-] unable to load all content from %s as the attachment size limit has been reached (%zu bytes). \n\
                         There was %zu bytes remaining, and we are trying to attach %zu bytes\n"
-                        ,email.attachments[i].filepath,TOTAL_MAX_ATTACH_SIZE,(TOTAL_MAX_ATTACH_SIZE-total_attachsize_so_far), attachment_size);
-                        attach = false;
+                        ,email.attachments[i].filepath,attachment_content_size,(attachment_content_size-total_attachsize_so_far), attachment_size);
+                        
+                        fprintf(stderr,"[-] Reallocing to try and fix...\n");
+                        attachment_content_size *= 2;
+                        char* tmp_ptr = (char*)realloc(attachment_content,attachment_content_size*sizeof(char));
+                        if (tmp_ptr == NULL) {
+                            fprintf(stderr,"[-] Unable to allocate attachment content\n");
+                            attach = false;
+                        }
+                        else {
+                            attachment_content = tmp_ptr;
+                        }
             }
 
             if (attachment_buffer == NULL || strlen(attachment_buffer) <= 0 || attachment_size <= 0) {
@@ -210,7 +226,7 @@ char* composerComposeEmail(Email email,int force) {
             free(attachment_buffer);
 
             if (attach) {
-                strncat(attachment_content, tmp,MAX_ATTACH_AMOUNT - total_attachsize_so_far);
+                strncat(attachment_content, tmp,attachment_content_size - total_attachsize_so_far);
                 total_attachsize_so_far += attachment_size;
                 attachmentsParsed++;
             }
