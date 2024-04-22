@@ -46,21 +46,21 @@ int main(int argc, char* argv[]) {
     char* EMAIL_SMTP = getenv("EMAIL_SMTP");
 
     if (EMAIL_PASS == NULL) {
-        fprintf(stderr, "unable to get EMAIL_PASS, please set in envrioment");
+        fprintf(stderr, "unable to get EMAIL_PASS, please set in envrioment\n");
         exit(ERR_ENV_PARSING);
     }
     if (EMAIL_USERNAME == NULL) {
-        fprintf(stderr, "unable to get EMAIL_USERNAME, please set in envrioment");
+        fprintf(stderr, "unable to get EMAIL_USERNAME, please set in envrioment\n");
         exit(ERR_ENV_PARSING);
     }
 
     if (EMAIL_USERNAME == NULL) {
-        fprintf(stderr, "unable to get EMAIL_USER, please set in envrioment");
+        fprintf(stderr, "unable to get EMAIL_USER, please set in envrioment\n");
         exit(ERR_ENV_PARSING);
     }
 
     if (EMAIL_SMTP == NULL) {
-        fprintf(stderr, "unable to get EMAIL_SMTP, please set in envrioment with format smtp://smtp.example.com:<PORT NUMBER>");
+        fprintf(stderr, "unable to get EMAIL_SMTP, please set in envrioment with format smtp://smtp.example.com:<PORT NUMBER>\n");
         exit(ERR_ENV_PARSING);
     }
 

@@ -12,8 +12,7 @@ EMAIL_USERNAME="Real name"
 EMAIL_USER="user@gmail..com"
 ```
 
-In order to do this, you need to get an app password from google:
-https://support.google.com/accounts/answer/185833?hl=en
+In order to do this, you need to get an [app password from google, instructions here](https://support.google.com/accounts/answer/185833?hl=en)
 
 However other mail boxes will let you log in with your actual passwords 
 
@@ -26,6 +25,8 @@ cd cmail_cli_app && mkdir bin && make && make install
 ```
 
 And you are done :) it installs to ~/.local/bin/mailer by default.
+
+If you can an error for libcurl, you can find install instructions [here](https://ec.haxx.se/install/)
 
 ## Useage
 
