@@ -73,6 +73,9 @@ void mailSendEmail(Email email,int force,char* user,char* username, char* smtp,c
 
             char* email_txt = composerComposeEmail(email, force);
             strncpy(payload_text,email_txt,PAYLOAD_SIZE);
+            if (strlen(email_txt) > strlen(payload_text)) {
+                fprintf(stderr,"[-] email payload is too big (%zu)... truncating\n",strlen(email_txt));
+            }
             free(email_txt);
 
             curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);

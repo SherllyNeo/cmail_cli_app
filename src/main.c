@@ -66,6 +66,7 @@ int main(int argc, char* argv[]) {
     if (EMAIL_USER && EMAIL_USERNAME && EMAIL_PASS && EMAIL_SMTP) {
         printf("[+] Retrieved enviroment variables\n");
     }
+
     char* to_addresses_arg = NULL;
     char* cc_addresses_arg = NULL;
     char* bcc_addresses_arg = NULL;
