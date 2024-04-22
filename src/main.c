@@ -37,6 +37,7 @@ const char help[] = "\nsimplex mailer \n---------------------- \n\n \
                      ";
 
 int main(int argc, char* argv[]) {
+    printf("%s\n",banner);
 
     /* check envrioment is correct */
     char* EMAIL_PASS = getenv("EMAIL_PASS");

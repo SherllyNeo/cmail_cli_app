@@ -31,6 +31,12 @@ And you are done :) it installs to ~/.local/bin/mailer by default.
 
 
 ```bash
+  ____ ___ __  __ ____  _     _______  __  __  __    _    ___ _
+/ ___|_ _|  \/  |  _ \| |   | ____\ \/ / |  \/  |  / \  |_ _| |
+\___ \| || |\/| | |_) | |   |  _|  \  /  | |\/| | / _ \  | || |
+ ___) | || |  | |  __/| |___| |___ /  \  | |  | |/ ___ \ | || |___
+|____/___|_|  |_|_|   |_____|_____/_/\_\ |_|  |_/_/   \_\___|_____|
+
 "Test Subject" -b "Test body" -t "user@example.com: Firstname Lastname,john.smith@email.com: John Smith" -a "README.md:New file.md,test.pdf" 
 [+] Retrieved enviroment variables 
 [+] Parsed addresses 
