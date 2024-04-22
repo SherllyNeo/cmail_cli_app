@@ -39,7 +39,7 @@ If you can an error for libcurl, you can find install instructions [here](https:
  ___) | || |  | |  __/| |___| |___ /  \  | |  | |/ ___ \ | || |___
 |____/___|_|  |_|_|   |_____|_____/_/\_\ |_|  |_/_/   \_\___|_____|
 
-"Test Subject" -b "Test body" -t "user@example.com: Firstname Lastname,john.smith@email.com: John Smith" -a "README.md:New file.md,test.pdf" 
+mailer -s "Test Subject" -b "Test body" -t "user@example.com: Firstname Lastname,john.smith@email.com: John Smith" -a "README.md:New file.md,test.pdf" 
 [+] Retrieved enviroment variables 
 [+] Parsed addresses 
 [+] Created email 
