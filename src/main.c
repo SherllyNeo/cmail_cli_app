@@ -75,8 +75,9 @@ int main(int argc, char* argv[]) {
     char* body = NULL;
     char* attachments_arg = NULL;
     int force = 0;
+    int i = 1;
 
-    for (int i=1;i<argc;i++) {
+    for (i=0;i<argc;i++) {
         char* current_arg = argv[i];
         if (!strcmp("-h",current_arg) || !strcmp("--help",current_arg)) {
             printf("\n%s\n",help);

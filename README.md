@@ -21,7 +21,7 @@ Then
 git clone https://github.com/SherllyNeo/cmail_cli_app.git
 ```
 ```bash
-cd cmail_cli_app && mkdir bin && make && make install
+cd cmail_cli_app && make && make install
 ```
 
 And you are done :) it installs to ~/.local/bin/mailer by default.
