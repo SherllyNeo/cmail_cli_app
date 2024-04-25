@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include "shared.h"
 
+#define REALLOC_TRIES 5
+
 
 char* readAttachment(char* filepath,size_t* file_size) {
     FILE* file = fopen(filepath, "rb");
@@ -200,20 +202,33 @@ char* composerComposeEmail(Email email,int force) {
 
 
             bool attach = true;
-            if ((attachment_content_size - total_attachsize_so_far) <= attachment_size ) {
+            int realloc_tries = 0;
+            while ((attachment_content_size - total_attachsize_so_far) <= attachment_size ) {
+                char* tmp_ptr = NULL;
                 fprintf(stderr,"[-] unable to load all content from %s as the attachment size limit has been reached (%zu bytes). \n\
                         There was %zu bytes remaining, and we are trying to attach %zu bytes\n"
                         ,email.attachments[i].filepath,attachment_content_size,(attachment_content_size-total_attachsize_so_far), attachment_size);
+                if (realloc_tries > REALLOC_TRIES) {
+                            fprintf(stderr,"[-] Unable to allocate attachment content, max tries of realloc %d has been reached\n",REALLOC_TRIES);
+                            attach = false;
+                            if (tmp_ptr) {
+                                free(tmp_ptr);
+                            }
+                            break;
+
+                }
                         
                         fprintf(stderr,"[-] Reallocing to try and fix...\n");
                         attachment_content_size *= 2;
-                        char* tmp_ptr = (char*)realloc(attachment_content,attachment_content_size*sizeof(char));
+                        tmp_ptr = (char*)realloc(attachment_content,attachment_content_size*sizeof(char));
                         if (tmp_ptr == NULL) {
                             fprintf(stderr,"[-] Unable to allocate attachment content\n");
                             attach = false;
+                            break;
                         }
                         else {
                             attachment_content = tmp_ptr;
+                            free(tmp_ptr);
                         }
             }
 
