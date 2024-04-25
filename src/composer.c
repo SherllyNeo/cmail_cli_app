@@ -180,9 +180,8 @@ char* composerComposeEmail(Email email,int force) {
                     "%s\r\n"
                     "\r\n"
                     "%s\r\n"
-                    "\r\n"
-                    "\r\n--%s\r\n",
-                    boundary_text,get_content_type(email.attachments[i].filetype),email.attachments[i].name,encoding,attachment_buffer,boundary_text);
+                    "\r\n",
+                    boundary_text,get_content_type(email.attachments[i].filetype),email.attachments[i].name,encoding,attachment_buffer);
 
             char* tmp = malloc((attachment_size+1)*sizeof(char));
             memset(tmp,'\0',(attachment_size+1)*sizeof(char));
@@ -308,7 +307,8 @@ char* composerComposeEmail(Email email,int force) {
             "--%s\r\n"
             "Content-Type: text/plain;\r\n"
             "\r\n"
-            "%s\r\n",
+            "%s\r\n"
+            "\r\n",
             addressesLine, fromLine, ccaddressesLine, boundary_text, email.subject,boundary_text,email.body);
 
 
@@ -316,12 +316,11 @@ char* composerComposeEmail(Email email,int force) {
         strcat(payload_text,attachment_content);
     }
     /* add the bottom bounary */
-    char tmp[100] = { 0 };
-    sprintf(tmp, 
-            "--%s\r\n"
-            "\r\n",
-            boundary_text);
-    strcat(payload_text,tmp);
+   // char tmp[100] = { 0 };
+   // sprintf(tmp, 
+   //         "--%s\r\n",
+   //         boundary_text);
+   // strcat(payload_text,tmp);
 
     printf("%s\n",payload_text);
     return payload_text;
