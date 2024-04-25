@@ -196,9 +196,8 @@ char* composerComposeEmail(Email email,int force) {
                     "%s\r\n"
                     "\r\n"
                     "%s\r\n"
-                    "\r\n"
-                    "\r\n--%s\r\n",
-                    boundary_text,get_content_type(email.attachments[i].filetype),email.attachments[i].name,encoding,attachment_buffer,boundary_text);
+                    "\r\n",
+                    boundary_text,get_content_type(email.attachments[i].filetype),email.attachments[i].name,encoding,attachment_buffer);
 
 
             bool attach = true;
@@ -316,15 +315,15 @@ char* composerComposeEmail(Email email,int force) {
     if (email.amount_of_attachments > 0 && send_attachments) {
         strcat(payload_text,attachment_content);
     }
-    else {
-        char tmp[100] = { 0 };
-        sprintf(tmp, 
+    /* add the bottom bounary */
+    char tmp[100] = { 0 };
+    sprintf(tmp, 
             "--%s\r\n"
-             "\r\n",
-                boundary_text);
-        strcat(payload_text,tmp);
-    }
+            "\r\n",
+            boundary_text);
+    strcat(payload_text,tmp);
 
+    printf("%s\n",payload_text);
     return payload_text;
 }
 
