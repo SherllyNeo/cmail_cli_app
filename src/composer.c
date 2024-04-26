@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include "shared.h"
 
-#define REALLOC_TRIES 5
+#define REALLOC_TRIES 12
 
 
 char* readAttachment(char* filepath,size_t* file_size) {
@@ -204,6 +204,7 @@ char* composerComposeEmail(Email email,int force) {
             bool attach = true;
             int realloc_tries = 0;
             while ((attachment_content_size - total_attachsize_so_far) <= attachment_size ) {
+                realloc_tries++;
                 char* tmp_ptr = NULL;
                 fprintf(stderr,"[-] unable to load all content from %s as the attachment size limit has been reached (%zu bytes). \n\
                         There was %zu bytes remaining, and we are trying to attach %zu bytes\n"
@@ -215,7 +216,6 @@ char* composerComposeEmail(Email email,int force) {
                                 free(tmp_ptr);
                             }
                             break;
-
                 }
                         
                         fprintf(stderr,"[-] Reallocing to try and fix...\n");
@@ -228,9 +228,10 @@ char* composerComposeEmail(Email email,int force) {
                         }
                         else {
                             attachment_content = tmp_ptr;
-                            free(tmp_ptr);
+                            fprintf(stderr,"[+] allocated %zu bytes\n",attachment_content_size);
                         }
             }
+
 
             if (attachment_buffer == NULL || strlen(attachment_buffer) <= 0 || attachment_size <= 0) {
                     fprintf(stderr,"[-] unable to load any content from %s\n",email.attachments[i].filepath);
@@ -307,8 +308,8 @@ char* composerComposeEmail(Email email,int force) {
     /* composed addresses as csv strings and set from */
 
 
-    char* payload_text = malloc(sizeof(char)*PAYLOAD_SIZE);
-    memset(payload_text,'\0',sizeof(char)*PAYLOAD_SIZE);
+    char* payload_text = malloc(sizeof(char)*(PAYLOAD_SIZE+attachment_content_size+1));
+    memset(payload_text,'\0',sizeof(char)*(PAYLOAD_SIZE+attachment_content_size+1));
 
     snprintf(payload_text, PAYLOAD_SIZE,
             "To: %s \r\n"
@@ -326,6 +327,7 @@ char* composerComposeEmail(Email email,int force) {
             "\r\n",
             addressesLine, fromLine, ccaddressesLine, boundary_text, email.subject,boundary_text,email.body);
 
+   // strcat(payload_text,tmp);
 
     if (email.amount_of_attachments > 0 && send_attachments) {
         strcat(payload_text,attachment_content);
@@ -337,7 +339,6 @@ char* composerComposeEmail(Email email,int force) {
    //         boundary_text);
    // strcat(payload_text,tmp);
 
-    printf("%s\n",payload_text);
     return payload_text;
 }
 
