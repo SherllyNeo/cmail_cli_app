@@ -38,6 +38,7 @@ If you can an error for libcurl, you can find install instructions [here](https:
 \___ \| || |\/| | |_) | |   |  _|  \  /  | |\/| | / _ \  | || |
  ___) | || |  | |  __/| |___| |___ /  \  | |  | |/ ___ \ | || |___
 |____/___|_|  |_|_|   |_____|_____/_/\_\ |_|  |_/_/   \_\___|_____|
+by SherllyNeo
 
 mailer -s "Test Subject" -b "Test body" -t "user@example.com: Firstname Lastname,john.smith@email.com: John Smith" -a "README.md:New file.md,test.pdf" 
 [+] Retrieved enviroment variables 
