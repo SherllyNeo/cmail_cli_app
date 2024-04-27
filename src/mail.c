@@ -72,8 +72,6 @@ void mailSendEmail(Email email,int force,char* user,char* username, char* smtp,c
             }
 
             char* email_txt = composerComposeEmail(email, force);
-            printf("DEBUG2\n");
-            printf("got here %s\n",email_txt);
             strncpy(payload_text,email_txt,PAYLOAD_SIZE);
             if (strlen(email_txt) > strlen(payload_text)) {
                 fprintf(stderr,"[-] email payload is too big (%zu), limit is %d... truncating to fit\n",strlen(email_txt),PAYLOAD_SIZE);
