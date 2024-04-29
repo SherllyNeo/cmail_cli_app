@@ -65,10 +65,10 @@ void mailSendEmail(Email email,int force,char* user,char* username, char* smtp,c
                 strcat(sentAddresses,"\n");
                 strcat(sentAddresses,email.addresses[i].address);
             }
-            for (int j =0; j<email.amount_of_ccaddresses;j++) {
+            for (int j = 0; j<email.amount_of_ccaddresses;j++) {
                 recipients = curl_slist_append(recipients, email.ccaddresses[j].address);
                 strcat(sentAddresses,"\n");
-                strcat(sentAddresses,email.addresses[j].address);
+                strcat(sentAddresses,email.ccaddresses[j].address);
             }
 
             char* email_txt = composerComposeEmail(email, force);
