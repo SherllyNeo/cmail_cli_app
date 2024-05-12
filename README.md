@@ -1,4 +1,4 @@
-# Simplex mail
+# Better mail
 
 ## Getting started
 
@@ -18,10 +18,10 @@ However other mail boxes will let you log in with your actual passwords
 
 Then 
 ```bash
-git clone https://github.com/SherllyNeo/cmail_cli_app.git
+git clone https://github.com/SherllyNeo/better_mail.git
 ```
 ```bash
-cd cmail_cli_app && make && make install
+cd better_mail && make && make install
 ```
 
 And you are done :) it installs to ~/.local/bin/mailer by default.

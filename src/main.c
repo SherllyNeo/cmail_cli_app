@@ -10,24 +10,24 @@
 #include "mail.h"
 
 const char banner[] = "\n \
- ____ ___ __  __ ____  _     _______  __  __  __    _    ___ _ \n\
-/ ___|_ _|  \\/  |  _ \\| |   | ____\\ \\/ / |  \\/  |  / \\  |_ _| | \n\
-\\___ \\| || |\\/| | |_) | |   |  _|  \\  /  | |\\/| | / _ \\  | || | \n\
- ___) | || |  | |  __/| |___| |___ /  \\  | |  | |/ ___ \\ | || |___ \n\
-|____/___|_|  |_|_|   |_____|_____/_/\\_\\ |_|  |_/_/   \\_\\___|_____| \n \
+____       _   _              __  __       _ _  \n \
+| __ )  ___| |_| |_ ___ _ __  |  \\/  | __ _(_) |\n \
+|  _ \\ / _ \\ __| __/ _ \\ '__| | |\\/| |/ _` | | |\n \
+| |_) |  __/ |_| ||  __/ |    | |  | | (_| | | |\n \
+|____/ \\___|\\__|\\__\\___|_|    |_|  |_|\\__,_|_|_|\n \
 by SherllyNeo";
 
 
-const char help[] = "\nsimplex mailer \n---------------------- \n\n \
-                     -h or --help to view help\n \
-                     -t or --to_addresses sets the to addresses\n \
-                     -c or --carbon_copy_addresses sets CC addresses\n \
-                     -bc or --blind_carbon_copy_addresses BCC addresses\n \
-                     -s or --subject sets subject\n \
-                     -b or --body sets body\n \
-                     -a or --attachment_paths\n \
-                     Attachment name will default to attachment path name if not specified\n \
-                     -f  or --force alone will ensure email is sent without an attachment if an attachment isn't found. rather than exiting\n \
+const char help[] = "\nbetter mail \n---------------------- \n \
+                    \n-h or --help to view help\n \
+                    \n-t or --to_addresses sets the to addresses\n \
+                    \n-c or --carbon_copy_addresses sets CC addresses\n \
+                    \n-bc or --blind_carbon_copy_addresses BCC addresses\n \
+                    \n-s or --subject sets subject\n \
+                    \n-b or --body sets body\n \
+                    \n-a or --attachment_paths\n \
+                    \nAttachment name will default to attachment path name if not specified\n \
+                    \n-f  or --force alone will ensure email is sent without an attachment if an attachment isn't found. rather than exiting\n \
                      \n \
                      You can write \"name@example.com:FirstName MiddleName Lastname\" for the email to be sent To: FirstName MiddleName LastName <name@example.com>\n \
                      You can write /path/to/attachmentPath.txt:NewAttachmentName.txt for the email to show AttachmentName.txt\n \
